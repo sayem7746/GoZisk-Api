@@ -1,6 +1,6 @@
 export default {
   HOST: "localhost",
   USER: "root",
-  PASSWORD: "123456",
-  DB: "testdb"
+  PASSWORD: "h1qB!m8P",
+  DB: "gozisk"
 };
