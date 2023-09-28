@@ -2,7 +2,8 @@ import { OkPacket } from "mysql2";
 import connection from "../../db";
 
 import User from "./user.model";
-import IUserLogin from "./user.model";
+import moment from "moment";
+// import IUserLogin from "./user.model";
 
 interface IUserRepository {
   save(user: User): Promise<User>;
@@ -11,17 +12,28 @@ interface IUserRepository {
   update(user: User): Promise<number>;
   delete(userId: number): Promise<number>;
   deleteAll(): Promise<number>;
+  makeReferCode(prefix: string, length: number): string;
+  getHierarchy(userId: number): Promise<User[]>;
 }
 
 class UserRepository implements IUserRepository {
+  userHierarchyList: any[] = [];
   save(user: User): Promise<User> {
     return new Promise((resolve, reject) => {
       connection.query<OkPacket>(
-        "INSERT INTO users (full_name, username, email, phone, password_hash) VALUES(?,?,?,?,?)",
-        [user.full_name, user.username, user.email, user.phone, user.password_hash],
+        "INSERT INTO users (full_name, username, email, phone, password_hash, refer_code, referrer_id) VALUES(?,?,?,?,?,?,?)",
+        [
+          user.full_name,
+          user.username,
+          user.email,
+          user.phone,
+          user.password_hash,
+          user.refer_code,
+          user.referrer_id
+        ],
         (err, res) => {
-          if (err) reject(err);
-          else
+          if (err) reject(err.message);
+          else 
             this.retrieveById(res.insertId)
               .then((user) => resolve(user!))
               .catch(reject);
@@ -30,10 +42,10 @@ class UserRepository implements IUserRepository {
     });
   }
 
-  verifyLogin(userLogin: IUserLogin): Promise<User> {
+  verifyLogin(userLogin: Partial<User>): Promise<User> {
     return new Promise((resolve, reject) => {
       connection.query<User[]>(
-        "SELECT email, username, password_hash, display_name, full_name, phone, wallet_addr  FROM users WHERE email = ?",
+        "SELECT id, email, username, password_hash, full_name, phone, wallet_addr, refer_code  FROM users WHERE email = ?",
         [userLogin.email],
         (err, res) => {
           if (err) reject(err);
@@ -90,6 +102,20 @@ class UserRepository implements IUserRepository {
     });
   }
 
+  retrieveByUsername(userName: string): Promise<User> {
+    console.log(`SELECT * FROM users WHERE username = ${userName}`);
+    return new Promise((resolve, reject) => {
+      connection.query<User[]>(
+        "SELECT * FROM users WHERE username = ?",
+        [userName],
+        (err, res) => {
+          if (err) reject(err);
+          else resolve(res?.[0]);
+        }
+      );
+    });
+  }
+
   update(user: User): Promise<number> {
     return new Promise((resolve, reject) => {
       connection.query<OkPacket>(
@@ -123,6 +149,55 @@ class UserRepository implements IUserRepository {
         else resolve(res.affectedRows);
       });
     });
+  }
+
+  checkReferral(refer_code: string): Promise<User> {
+    return new Promise((resolve, reject) => {
+      connection.query<User[]>(
+        "SELECT * FROM users WHERE refer_code = ?",
+        [refer_code],
+        (err, res) => {
+          if (err) reject(err);
+          else resolve(res?.[0]);
+        }
+      );
+    });
+  }
+
+  // Generate referral code
+  makeReferCode(prefix: string, length: number = 4): string {
+    let result = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+    const charactersLength = characters.length;
+    let counter = 0;
+    while (counter < length) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+      counter += 1;
+    }
+    return prefix + result;
+  }
+
+  async getHierarchy(userId: number): Promise<User[]> {
+    return new Promise((resolve, reject) => {
+      connection.query<User[]>(
+        "CALL getAffiliateTree(?)",
+        [userId],
+        (err, res) => {
+          if (err) reject(err);
+          else resolve(res);
+        }
+      )
+    });
+  }
+
+  // Generate reference number
+  generateReferenceNumber(): string {
+    let toDate = moment().format('YYYYMMDD');
+    return `GOZISK${toDate + this.generateRandNumber()}`;
+  }
+
+  generateRandNumber(): number {
+    return Math.floor(Math.random() * (100000000 - 1)) + 1;
   }
 }
 

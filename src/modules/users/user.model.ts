@@ -17,12 +17,10 @@ export default interface User extends RowDataPacket {
     last_ip: string;
     banned: boolean;
     ban_message: string;
-    display_name: string;
     active: number;
     referrer_id: number;
     posid: number;
-    first_name: string;
-    last_name: string;
+    full_name: string;
     position: string;
     balance: number;
     street_address: string;
@@ -32,4 +30,5 @@ export default interface User extends RowDataPacket {
     phone: string;
     wallet_addr: string;
     post_code: string;
+    refer_code: string;
 }

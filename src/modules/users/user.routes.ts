@@ -1,7 +1,7 @@
 import { Router } from "express";
 import UserController from "./user.controller";
 
-class TutorialRoutes {
+class UserRoutes {
   router = Router();
   controller = new UserController();
 
@@ -10,30 +10,40 @@ class TutorialRoutes {
   }
 
   intializeRoutes() {
-    // Create a new Tutorial
+    // Create a new User
     this.router.post("/", this.controller.create);
 
     // User login
     this.router.post("/login", this.controller.login);
 
-    // Retrieve all Tutorials
+    // Retrieve all Users
     this.router.get("/", this.controller.findAll);
 
-    // Retrieve all published Tutorials
+    // Retrieve all published Users
     this.router.get("/published", this.controller.findAllPublished);
 
-    // Retrieve a single Tutorial with id
+    // Retrieve a single User with id
     this.router.get("/:id", this.controller.findOne);
 
-    // Update a Tutorial with id
+    // Update a User with id
     this.router.put("/:id", this.controller.update);
 
-    // Delete a Tutorial with id
+    // Delete a User with id
     this.router.delete("/:id", this.controller.delete);
 
-    // Delete all Tutorials
+    // Delete all Users
     this.router.delete("/", this.controller.deleteAll);
+
+    // check referral user
+    this.router.post("/referral", this.controller.checkReferral);
+
+
+    // Delete a User with id
+    this.router.get("/hierarchy/:id", this.controller.getHierarchy);
+
+    // Transfer money to another user
+    this.router.post("/transfer", this.controller.transfer);
   }
 }
 
-export default new TutorialRoutes().router;
+export default new UserRoutes().router;
