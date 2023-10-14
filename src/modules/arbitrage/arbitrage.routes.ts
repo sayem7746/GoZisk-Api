@@ -10,6 +10,7 @@ class ArbitrageRoutes {
   }
 
   intializeRoutes() {
+    this.router.get("/date/:date", this.controller.getByDate);
     this.router.get("/all", this.controller.exchanges);
     this.router.post("/create", this.controller.create);
   }

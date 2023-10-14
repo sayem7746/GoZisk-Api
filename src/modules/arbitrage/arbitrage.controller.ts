@@ -43,4 +43,16 @@ export default class ArbitrageController {
       });
     }
   }
+
+  async getByDate(req: Request, res: Response) {
+    const date = req.params.date;
+    try {
+      const allProfit = await arbitrageRepository.getArbitrageByDate(date);
+      res.status(200).send(allProfit);
+    } catch (err) {
+      res.status(500).send({
+        message: "Some error occurred while retrieving tutorials."
+      });
+    }
+  }
 }

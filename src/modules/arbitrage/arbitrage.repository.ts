@@ -34,10 +34,23 @@ class ArbitrageRepository implements IArbitrageRepository {
   getLastMatch(): Promise<any> {
     return new Promise((resolve, reject) => {
       connection.query<any>(
-        "SELECT * FROM arbitrage WHERE profit_percentage >= 0.03 ORDER BY id DESC LIMIT 1",
+        "SELECT * FROM arbitrage WHERE profit_percentage >= 0.05 ORDER BY id DESC LIMIT 1",
         (err, res) => {
           if (err) reject(err);
           else resolve(res?.[0]);
+        }
+      );
+    });
+  }
+
+  getArbitrageByDate(date: string): Promise<Arbitrage> {
+    return new Promise((resolve, reject) => {
+      connection.query<any>(
+        `SELECT * FROM arbitrage
+            WHERE  profit_percentage > 0.05 AND modified_on BETWEEN '${date} 00:00:00' AND '${date} 23:59:00'`,
+        (err, res) => {
+          if (err) reject(err);
+          else resolve(res);
         }
       );
     });
