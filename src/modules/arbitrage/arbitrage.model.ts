@@ -8,3 +8,11 @@ export default interface Arbitrage extends RowDataPacket {
   coin_rate_to: number;
   profit_percentage: number;
 }
+
+export default interface UserArbitrage extends RowDataPacket {
+  user_id: number;
+  invest_amount: number;
+  profit_percentage: number;
+  profit: number;
+  modified_on: string;
+}

@@ -28,6 +28,19 @@ class WalletRepository implements IWalletRepository {
         });
     }
     
+    retrieveAll(): Promise<Wallet[]> {
+        return new Promise((resolve, reject) => {
+            connection.query<Wallet[]>(
+                `SELECT w.*, u.referrer_id, u.username  FROM wallet w
+                    LEFT JOIN users u on u.id = w.user_id`,
+                (err, res) => {
+                    if (err) reject(err);
+                    else resolve(res);
+                }
+            );
+        });
+    }
+    
     retrieveAllPairing(): Promise<IPairing[]> {
         return new Promise((resolve, reject) => {
             connection.query<IPairing[]>(
@@ -103,6 +116,20 @@ class WalletRepository implements IWalletRepository {
         });
     }
 
+    updateUserArbitrageProfit(user_id: number, invest_amount: number, profit_percentage: number, profit: number, profit_on: string): Promise<number> {
+        return new Promise((resolve, reject) => {
+            connection.query<OkPacket>(
+                `INSERT INTO user_arbitrage_profit
+                    (user_id, invest_amount, profit_percentage, profit, profit_on)
+                        VALUES(${user_id}, ${invest_amount}, ${profit_percentage}, ${profit}, '${profit_on} 00:00:00.000')`,
+                (err, res) => {
+                    if (err) reject(err);
+                    else resolve(res.affectedRows);
+                }
+            );
+        });
+    }
+
     addProfitById(profit: number, user_id: number): Promise<Wallet> {
         return new Promise((resolve, reject) => {
             connection.query<OkPacket>(
@@ -151,10 +178,8 @@ class WalletRepository implements IWalletRepository {
     pairUser(user_id: number, pairingLegs: any[]) {
         if(pairingLegs.length > 1) {
             pairingLegs.sort((a,b) => a.totalBellowInvest - b.totalBellowInvest);
-            // console.log(pairingLegs);
             this.calculatePairing(user_id, pairingLegs);
         } else if (pairingLegs.length === 1) {
-            // console.log(pairingLegs[0]);
             this.updateUserPairStatus(pairingLegs[0]);
         }
     }
@@ -176,7 +201,7 @@ class WalletRepository implements IWalletRepository {
 
         let profit = totalPairValue * 0.05;
         const userWallet: Wallet = await this.retrieveById(user_id);
-        if (profit > 0 && parseFloat(userWallet.invest_wallet) > 100) {
+        if (profit > 0 && userWallet.invest_wallet > 100) {
             const updatedUserWallet: Wallet = await this.addProfitById(profit, user_id);
 
             const referenceNumber = userRepository.generateReferenceNumber();
@@ -195,10 +220,7 @@ class WalletRepository implements IWalletRepository {
             };
 
             await transactionRepository.create(transactionDetail);
-            // console.log(`=====${user_id}======pairing profit=====${profit}======`);
         }
-        
-        // console.log(`==========${user_id}==>>>${totalPairValue}=============`);
     }
 
     // UPDATE PAIR STATUS TO DATABASE.
@@ -217,12 +239,12 @@ class WalletRepository implements IWalletRepository {
         });
     }
 
-    async calcRoiBonus(bonusFromId: number, userId: number, bonusValue: number, level: number = 1): Promise<boolean> {
+    async calcRoiBonus(bonusFromUsername: string, userId: number, bonusValue: number, level: number = 1): Promise<boolean> {
         let userWallet: Wallet = await this.retrieveById(userId);
         const user: User = await userRepository.retrieveById(userId);
 
         if (user !== undefined && level <= 10) {
-            if (parseFloat(userWallet.invest_wallet) > 100) {
+            if (userWallet.invest_wallet > 100) {
                 let profit = 0;
                 switch(level) {
                     case 1: 
@@ -238,19 +260,19 @@ class WalletRepository implements IWalletRepository {
                         profit = bonusValue * 0.001;
                         break;
                 }
-                console.log(`===Level ${level},==User: ${user.id}=====Profit: ${profit}=====\n`)    
+                
                 const updatedUserWallet: Wallet = await this.addProfitById(profit, user.id);
 
                 const referenceNumber = userRepository.generateReferenceNumber();
                 const transactionDetail: any = {
-                    description: `Investment ROI bonus ${profit} from ${bonusFromId}.`,
-                    type: 'InvestmentRoiBonus',
+                    description: `Arbitrage ROI bonus ${profit} from ${bonusFromUsername}.`,
+                    type: 'ArbitrageRoiBonus',
                     amount: profit,
                     balance: updatedUserWallet.net_wallet,
                     reference_number: referenceNumber,
                     user_id: user.id,
                     status: 'completed',
-                    notes: 'Investment ROI bonus',
+                    notes: 'Arbitrage ROI bonus',
                     transaction_fee: 0,
                     approval: Approval.Approved,
                     currency: 'USDT',
@@ -259,7 +281,7 @@ class WalletRepository implements IWalletRepository {
                 await transactionRepository.create(transactionDetail);
             }
 
-            this.calcRoiBonus(bonusFromId, user.referrer_id, bonusValue, level + 1);
+            this.calcRoiBonus(bonusFromUsername, user.referrer_id, bonusValue, level + 1);
         }
         
         return true;

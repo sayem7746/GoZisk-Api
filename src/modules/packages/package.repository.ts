@@ -75,8 +75,7 @@ class PackageRepository implements IPackageRepository {
   }
 
   async updateUserWallet(wallet: Wallet, amount: number): Promise<Wallet> {
-    const user: User = await userRepository.retrieveById(wallet.user_id);
-    walletRepository.calcRoiBonus(user.id, user.referrer_id, amount);
+    await userRepository.retrieveById(wallet.user_id);
     return {
       ...wallet, 
       net_wallet: wallet.net_wallet - amount,

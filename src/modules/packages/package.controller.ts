@@ -74,7 +74,6 @@ export default class PackageController {
         }
 
         await transactionRepository.create(transactionDetail);
-        await transactionRepository.create({...transactionDetail, balance: userWallet.invest_wallet});
         
 
 

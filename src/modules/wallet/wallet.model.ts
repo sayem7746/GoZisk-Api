@@ -5,8 +5,8 @@ export default interface Wallet extends RowDataPacket {
     id: number;
     user_id: number;
     net_wallet: number;
-    invest_wallet: string;
-    roi_wallet: string;
+    invest_wallet: number;
+    roi_wallet: number;
     modified: string;
     deleted: number;
 }

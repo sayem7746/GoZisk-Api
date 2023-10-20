@@ -48,7 +48,6 @@ export default class UserController {
         password_hash: req.body.password,
         refer_code: userRepository.makeReferCode(req.body.username)
       };
-      console.log(user);
       const savedUser = await userRepository.save(user);
       res.status(201).send(savedUser);
     } catch (err) {
@@ -68,7 +67,6 @@ export default class UserController {
       }
       res.status(200).send({ user: validUser, wallet: userWallet });
     } catch (err) {
-      console.log(err);
       res.status(500).send({
         message: "User not exists!."
       });

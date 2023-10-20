@@ -103,7 +103,6 @@ class UserRepository implements IUserRepository {
   }
 
   retrieveByUsername(userName: string): Promise<User> {
-    console.log(`SELECT * FROM users WHERE username = ${userName}`);
     return new Promise((resolve, reject) => {
       connection.query<User[]>(
         "SELECT * FROM users WHERE username = ?",
