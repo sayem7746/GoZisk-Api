@@ -38,6 +38,8 @@
     "cors": "^2.8.5",
     "express": "^4.18.2",
     "moment": "^2.29.4",
-    "mysql2": "^3.4.3"
+    "mysql2": "^3.4.3",
+    "nodemailer": "^6.9.7",
+    "nodemailer-express-handlebars": "^6.1.0"
   }
 }
