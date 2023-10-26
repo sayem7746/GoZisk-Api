@@ -74,6 +74,9 @@ class WalletRepository implements IWalletRepository {
     }
 
     addDepositAddress(userId: number, data: IDepositAddress): Promise<string> {
+        console.log(`INSERT INTO deposit_address
+        (user_id, wallet_address, status, username)
+        VALUES(${userId}, '${data.address}', 'active', '${data.username}')`);
         return new Promise((resolve, reject) => {
             connection.query<any>(
                 `INSERT INTO deposit_address
