@@ -42,12 +42,19 @@ export default class UserController {
             const userDepositAddress = await walletRepository.getDepositAddress(userId);
             if (!userDepositAddress.wallet_address) {
                 const data: any = {username: userDepositAddress.user_name};
-                const addr = await axios.post<any>(`https://payment.gozisk.com/getaddress.php`, data, config);
-                if (addr.data.error){
-                    res.status(401).send({error: addr.data.error});    
-                } else {
-                    await walletRepository.addDepositAddress(userId, addr.data);
-                    res.status(200).send({deposit_address: addr.data.address});
+                console.log(data, config);
+                try {
+                    const addr = await axios.post<any>(`https://payment.gozisk.com/getaddress.php`, data, config);
+                    if (addr.data.error){
+                        res.status(401).send({error: addr.data.error});    
+                    } else {
+                        await walletRepository.addDepositAddress(userId, addr.data);
+                        res.status(200).send({deposit_address: addr.data.address});
+                    }
+                } catch (err) {
+                    res.status(500).send({
+                        message: `Error calling gateway`
+                    });
                 }
             } else {
                 res.status(200).send({deposit_address: userDepositAddress.wallet_address});    
