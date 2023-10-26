@@ -45,6 +45,7 @@ export default class UserController {
                 console.log(data, config);
                 try {
                     const addr = await axios.post<any>(`https://payment.gozisk.com/getaddress.php`, data, config);
+                    console.log(addr.data);
                     if (addr.data.error){
                         res.status(401).send({error: addr.data.error});    
                     } else {
