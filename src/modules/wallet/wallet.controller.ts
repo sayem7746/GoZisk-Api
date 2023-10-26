@@ -42,10 +42,8 @@ export default class UserController {
             const userDepositAddress = await walletRepository.getDepositAddress(userId);
             if (!userDepositAddress.wallet_address) {
                 const data: any = {username: userDepositAddress.user_name};
-                console.log(data, config);
                 try {
                     const addr = await axios.post<any>(`https://payment.gozisk.com/getaddress.php`, data, config);
-                    console.log(addr.data);
                     if (addr.data.error){
                         res.status(401).send({error: addr.data.error});    
                     } else {
