@@ -1,8 +1,9 @@
 import { OkPacket } from "mysql2";
+import axios from 'axios';
 import connection from "../../db";
 import * as moment from 'moment'
 
-import Wallet, {IPairing} from "./wallet.model";
+import Wallet, {ICryptoTransaction, IDepositAddress, IPairing} from "./wallet.model";
 import User from "../users/user.model";
 import { Approval }from "../../models/transaction.model";
 import userRepository from "../users/user.repository";
@@ -27,6 +28,22 @@ class WalletRepository implements IWalletRepository {
             );
         });
     }
+
+    retrieveTransactionById(cryptoTxId: string): Promise<ICryptoTransaction> {
+        return new Promise((resolve, reject) => {
+            connection.query<ICryptoTransaction[]>(
+                `SELECT ct.*, u.id user_id
+                    FROM crypto_transaction ct 
+                        LEFT JOIN users u ON u.username = ct.username
+                    WHERE txid = ?`,
+                [cryptoTxId],
+                (err, res) => {
+                    if (err) reject(err);
+                    else resolve(res?.[0]);
+                }
+            );
+        });
+    }
     
     retrieveAll(): Promise<Wallet[]> {
         return new Promise((resolve, reject) => {
@@ -40,7 +57,67 @@ class WalletRepository implements IWalletRepository {
             );
         });
     }
-    
+
+    getDepositAddress(userId: number): Promise<any> {
+        return new Promise((resolve, reject) => {
+            connection.query<any>(
+                `SELECT u.username user_name, da.*
+                    FROM users u
+                    LEFT JOIN deposit_address da ON da.user_id = u.id
+                        WHERE u.id = ${userId}`,
+                (err, res) => {
+                    if (err) reject(err);
+                    else resolve(res[0]);
+                }
+            );
+        });
+    }
+
+    addDepositAddress(userId: number, data: IDepositAddress): Promise<string> {
+        return new Promise((resolve, reject) => {
+            connection.query<any>(
+                `INSERT INTO deposit_address
+                    (user_id, wallet_address, status, username)
+                    VALUES(${userId}, '${data.address}', 'active', '${data.username}')`,
+                (err, res) => {
+                    if (err) reject(err);
+                    else resolve('Success');
+                }
+            );
+        });
+    }
+
+    getTransaction(username: string, txid: string): Promise<ICryptoTransaction> {
+        return new Promise((resolve, reject) => {
+            connection.query<ICryptoTransaction[]>(
+                `SELECT *
+                    FROM crypto_transaction
+                        WHERE username = '${username}' && txid = '${txid}'`,
+                (err, res) => {
+                    if (err) reject(err);
+                    else resolve(res[0]);
+                }
+            );
+        });
+    }
+
+    saveTransaction(data: ICryptoTransaction): Promise<ICryptoTransaction> {
+        return new Promise((resolve, reject) => {
+            connection.query<ICryptoTransaction[]>(
+                `INSERT INTO crypto_transaction
+                    (username, txid, txdate, amount, send_to, send_from, type)
+                        VALUES('${data.username}', '${data.txid}', '${data.txdate}', ${data.amount}, '${data.send_to}', '${data.send_from}', 'deposit')`,
+                (err, res) => {
+                    if (err) reject(err);
+                    else
+                        this.retrieveTransactionById(data.txid)
+                            .then((transaction) => resolve(transaction!))
+                            .catch(reject);
+                }
+            );
+        });
+    }
+
     retrieveAllPairing(): Promise<IPairing[]> {
         return new Promise((resolve, reject) => {
             connection.query<IPairing[]>(
@@ -106,6 +183,21 @@ class WalletRepository implements IWalletRepository {
             connection.query<OkPacket>(
                 `UPDATE wallet
                     SET ${column}=?
+                    WHERE user_id=?`,
+                [column_value, user_id],
+                (err, res) => {
+                    if (err) reject(err);
+                    else resolve(res.affectedRows);
+                }
+            );
+        });
+    }
+    
+    apendByColumn(column: string, column_value: any, user_id: number): Promise<number> {
+        return new Promise((resolve, reject) => {
+            connection.query<OkPacket>(
+                `UPDATE wallet
+                    SET ${column}= ${column} + ?
                     WHERE user_id=?`,
                 [column_value, user_id],
                 (err, res) => {
@@ -289,3 +381,7 @@ class WalletRepository implements IWalletRepository {
 }
 
 export default new WalletRepository();
+function saveTransaction(data: any, ICryptoTransaction: any) {
+    throw new Error("Function not implemented.");
+}
+

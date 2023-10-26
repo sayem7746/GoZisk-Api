@@ -4,14 +4,14 @@ import walletRepository from "../wallet/wallet.repository";
 import {binance, kucoin, huobi, bybit} from 'ccxt';
 import UserArbitrage from "./arbitrage.model";
 import Wallet from "../wallet/wallet.model";
-import nodemailer from 'nodemailer';
+// import nodemailer from 'nodemailer';
 
 export default class ArbitrageController {
-
+/*
   ////////////////-------=====================mailer functions start==================-------------//////////////
   private transporter: nodemailer.Transporter;
 
-  private constructor() {
+  constructor() {
 
   }
 
@@ -75,7 +75,7 @@ export default class ArbitrageController {
   getTransporter() {
     return this.transporter;
   }
-
+*/
 
   ////////////////-------=====================mailer functions ends==================-------------//////////////
 
@@ -111,7 +111,7 @@ export default class ArbitrageController {
         kuCoinBtcValue,
         houbiBtcValue,
         bybitBtcValue,
-        latestMatch
+        latestMatch: latestMatch ? latestMatch : {}
       });
     } catch (err) {
       res.status(500).send({
