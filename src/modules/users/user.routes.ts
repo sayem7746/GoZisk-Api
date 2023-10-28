@@ -10,11 +10,6 @@ class UserRoutes {
   }
 
   intializeRoutes() {
-    // Create a new User
-    this.router.post("/", this.controller.create);
-
-    // User login
-    this.router.post("/login", this.controller.login);
 
     // Retrieve all Users
     this.router.get("/", this.controller.findAll);
@@ -34,15 +29,23 @@ class UserRoutes {
     // Delete all Users
     this.router.delete("/", this.controller.deleteAll);
 
-    // check referral user
-    this.router.post("/referral", this.controller.checkReferral);
-
-
     // Delete a User with id
     this.router.get("/hierarchy/:id", this.controller.getHierarchy);
 
+    // Get user transactions
+    this.router.get("/transactions/user/:userId/types/:types/limit/:limit", this.controller.transactions);
+
+    // check referral user
+    this.router.post("/referral", this.controller.checkReferral);
+
     // Transfer money to another user
     this.router.post("/transfer", this.controller.transfer);
+
+    // Create a new User
+    this.router.post("/", this.controller.create);
+
+    // User login
+    this.router.post("/login", this.controller.login);
   }
 }
 

@@ -61,6 +61,22 @@ class TransactionRepository implements ITransactionRepository {
             );
         });
     }
+
+    getTransactions(userId: number, types: string[], limit: number = 5): Promise<ITransaction[]> {
+        const typeList: string = types.map((type: string) => `'${type}'`).join(',');
+        return new Promise((resolve, reject) => {
+            connection.query<ITransaction[]>(
+                `SELECT * FROM transaction 
+                WHERE type in (${typeList}) AND user_id = ${userId}
+                ORDER BY modified DESC
+                LIMIT 0,${limit}`,
+                (err, res) => {
+                    if (err) reject(err);
+                    else resolve(res);
+                }
+            );
+        });
+    }
 }
 
 export default new TransactionRepository();

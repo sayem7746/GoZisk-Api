@@ -193,7 +193,7 @@ class WalletRepository implements IWalletRepository {
         });
     }
     
-    apendByColumn(column: string, column_value: any, user_id: number): Promise<number> {
+    apendByColumn(column: string, column_value: any, user_id: number): Promise<Wallet> {
         return new Promise((resolve, reject) => {
             connection.query<OkPacket>(
                 `UPDATE wallet
@@ -202,7 +202,9 @@ class WalletRepository implements IWalletRepository {
                 [column_value, user_id],
                 (err, res) => {
                     if (err) reject(err);
-                    else resolve(res.affectedRows);
+                    else this.retrieveById(user_id)
+                        .then((wallet: Wallet) => resolve(wallet))
+                        .catch(reject);
                 }
             );
         });

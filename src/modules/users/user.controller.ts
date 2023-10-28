@@ -203,6 +203,21 @@ export default class UserController {
     }
   }
 
+  async transactions(req: Request, res: Response) {
+    const userId: number = parseInt(req.params.userId);
+    const types: string[] = req.params.types.split(',');
+    const limit: number = parseInt(req.params.limit);
+    
+    try {
+      const transaction = await transactionRepository.getTransactions(userId, types, limit);
+      res.status(200).send(transaction);
+    } catch (err) {
+      res.status(500).send({
+        message: "Transaction list error!"
+      });
+    }
+  }
+
   async transfer(req: Request, res: Response) {
     const transferUserId: number = parseInt(req.body.transfer_user_id);
     const receiveUsername: string = req.body.receive_username;

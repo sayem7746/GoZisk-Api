@@ -2,6 +2,10 @@ import { Request, Response } from "express";
 import axios from 'axios';
 import walletRepository from "./wallet.repository";
 import { ICryptoTransaction } from "./wallet.model";
+import userRepository from "../users/user.repository";
+import transactionRepository from "../../repositories/transaction.repository";
+import User from "../users/user.model";
+import { Approval } from "../../models/transaction.model";
 
 export default class UserController {
 
@@ -66,7 +70,6 @@ export default class UserController {
     }
 
     async saveDeposit(req: Request, res: Response) {
-
         try {
             const txDetail: ICryptoTransaction = await walletRepository.getTransaction(req.body.username, req.body.txid);
             if (txDetail !== undefined) {
@@ -74,7 +77,22 @@ export default class UserController {
             } else {
                 const saveTransaction = await walletRepository.saveTransaction(req.body);
                 if (saveTransaction) {
-                    await walletRepository.apendByColumn('net_wallet', saveTransaction.amount, saveTransaction.user_id as number);
+                    const wallet = await walletRepository.apendByColumn('net_wallet', saveTransaction.amount, saveTransaction.user_id as number);
+                    const referenceNumber = userRepository.generateReferenceNumber();
+                    const transactionDetail: any = {
+                        description: `${saveTransaction.amount}USDT Deposited to wallet`,
+                        type: 'deposit',
+                        amount : req.body.amount,
+                        balance : wallet.net_wallet,
+                        reference_number : referenceNumber,
+                        user_id : saveTransaction.user_id,
+                        status : 'completed',
+                        notes : 'Deposit money',
+                        transaction_fee : 0,
+                        approval : Approval.Approved,
+                        currency : 'USDT',
+                      };
+                    await transactionRepository.create(transactionDetail);
                     res.status(200).send(saveTransaction);
                 } else {
                     res.status(500).send({
