@@ -42,7 +42,9 @@ class UserRoutes {
     this.router.post("/transfer", this.controller.transfer);
 
     // Create a new User
-    this.router.post("/", this.controller.create);
+    this.router.post("/signup", this.controller.create);
+    this.router.post("/verify", this.controller.emailVerify);
+    this.router.post("/genotp", this.controller.generateOtp);
 
     // User login
     this.router.post("/login", this.controller.login);

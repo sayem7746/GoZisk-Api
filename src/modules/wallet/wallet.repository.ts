@@ -16,6 +16,7 @@ interface IWalletRepository {
 }
 
 class WalletRepository implements IWalletRepository {
+
     retrieveById(userId: number): Promise<Wallet> {
         return new Promise((resolve, reject) => {
             connection.query<Wallet[]>(

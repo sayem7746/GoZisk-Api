@@ -31,4 +31,6 @@ export default interface User extends RowDataPacket {
     wallet_addr: string;
     post_code: string;
     refer_code: string;
+    registerOTP?: number;
+    otpExpiration?: string;
 }

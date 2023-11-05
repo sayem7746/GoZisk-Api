@@ -3,6 +3,7 @@ import connection from "../../db";
 
 import User from "./user.model";
 import moment from "moment";
+import { generateJWT } from "../../utils";
 // import IUserLogin from "./user.model";
 
 interface IUserRepository {
@@ -21,7 +22,7 @@ class UserRepository implements IUserRepository {
   save(user: User): Promise<User> {
     return new Promise((resolve, reject) => {
       connection.query<OkPacket>(
-        "INSERT INTO users (full_name, username, email, phone, password_hash, refer_code, referrer_id) VALUES(?,?,?,?,?,?,?)",
+        "INSERT INTO users (full_name, username, email, phone, password_hash, refer_code, referrer_id, active, registerOTP, otpExpiration) VALUES(?,?,?,?,?,?,?,?,?,?)",
         [
           user.full_name,
           user.username,
@@ -29,7 +30,10 @@ class UserRepository implements IUserRepository {
           user.phone,
           user.password_hash,
           user.refer_code,
-          user.referrer_id
+          user.referrer_id,
+          0,
+          user.registerOTP,
+          user.otpExpiration
         ],
         (err, res) => {
           if (err) reject(err.message);
@@ -45,7 +49,7 @@ class UserRepository implements IUserRepository {
   verifyLogin(userLogin: Partial<User>): Promise<User> {
     return new Promise((resolve, reject) => {
       connection.query<User[]>(
-        "SELECT id, email, username, password_hash, full_name, phone, wallet_addr, refer_code  FROM users WHERE email = ?",
+        "SELECT id, email, username, password_hash, full_name, phone, wallet_addr, refer_code, active  FROM users WHERE email = ?",
         [userLogin.email],
         (err, res) => {
           if (err) reject(err);
@@ -110,6 +114,32 @@ class UserRepository implements IUserRepository {
         (err, res) => {
           if (err) reject(err);
           else resolve(res?.[0]);
+        }
+      );
+    });
+  }
+
+  activateUser(email: string): Promise<number> {
+    return new Promise((resolve, reject) => {
+      connection.query<OkPacket>(
+        `UPDATE users SET active = 1  WHERE email = '${email}'`,
+        (err, res) => {
+          if (err) reject(err);
+          else resolve(res.affectedRows);
+        }
+      );
+    });
+  }
+
+  updateOtpByEmail(email: string, registerOTP: number, otpExpiration: any): Promise<User> {
+    return new Promise((resolve, reject) => {
+      connection.query<OkPacket>(
+        `UPDATE users SET registerOTP = ${registerOTP}, otpExpiration = '${otpExpiration}'  WHERE email = '${email}'`,
+        (err, res) => {
+          if (err) reject(err);
+          else this.retrieveByEmail(email)
+          .then((user) => resolve(user!))
+          .catch(reject);
         }
       );
     });
@@ -198,6 +228,26 @@ class UserRepository implements IUserRepository {
   generateRandNumber(): number {
     return Math.floor(Math.random() * (100000000 - 1)) + 1;
   }
+
+
+    //GENERATE TOKEN FOR LOGIN
+    async tokenBuilder(user: User): Promise<any> {
+      return new Promise((resolve, reject) => {
+        const accessToken = generateJWT(
+          {
+            id: user.id,
+            role: user.role_id === 1 ? 'user' : 'admin',
+            tokenType: 'access',
+          },
+          {
+            issuer: user.email,
+            subject: user.email,
+            audience: 'root',
+          }
+        );
+        resolve({accessToken: accessToken});
+      });
+  };
 }
 
 export default new UserRepository();

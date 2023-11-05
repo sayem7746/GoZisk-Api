@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import bcrypt from "bcrypt";
+import { compare, hash } from "bcrypt";
 import User from "./user.model";
 import userRepository from "./user.repository";
 import walletRepository from "../wallet/wallet.repository";
@@ -8,8 +8,21 @@ import Wallet from "../wallet/wallet.model";
 import ITransaction from "../../models/transaction.model";
 import { Approval }from "../../models/transaction.model";
 import transactionRepository from "../../repositories/transaction.repository";
+import { generateOtp } from "../../utils";
+import verifyEmail from '../../templates/verifyEmailTemplate';
+import MailService from "../../services/mailService";
+import moment from "moment";
 
 export default class UserController {
+  constructor() {
+    this.initEmail()
+  }
+
+  async initEmail() {
+    const mailService = MailService.getInstance();
+    await mailService.createConnection();
+  }
+  
   async create(req: Request, res: Response) {
     if (!req.body.full_name) {
       res.status(400).send({
@@ -35,20 +48,44 @@ export default class UserController {
       });
       return;
     }
+
+    let hashPassword = '';
     if (!req.body.password) {
       res.status(400).send({
         message: "Password can not be empty!"
       });
       return;
+    } else {
+      hashPassword = await hash(req.body.password, 12);
     }
 
     try {
+      //GENERATE OTP FOR MAIL VERIFICATION
+      let tokenExpiration: any = new Date();
+      tokenExpiration = tokenExpiration.setMinutes(
+          tokenExpiration.getMinutes() + 10
+      );
+
+      const otp: string = generateOtp(6);
+
       const user: User = {
         ...req.body,
-        password_hash: req.body.password,
-        refer_code: userRepository.makeReferCode(req.body.username)
+        password_hash: hashPassword,
+        refer_code: userRepository.makeReferCode(req.body.username),
+        registerOTP: otp,
+        otpExpiration: new Date(tokenExpiration)
       };
+      
       const savedUser = await userRepository.save(user);
+
+      //SEND VERIFICATION MAIL TO USER
+      const emailTemplate = verifyEmail(otp, req.body.full_name);
+      const mailService = MailService.getInstance();
+      await mailService.sendMail(req.headers['X-Request-Id'] as string, {
+          to: `"${req.body.full_name}" ${req.body.email}`,
+          subject: 'GoZisk Account Verify OTP',
+          html: emailTemplate.html,
+      });
       res.status(201).send(savedUser);
     } catch (err) {
       res.status(500).send({
@@ -61,14 +98,78 @@ export default class UserController {
     try {
       const userData: IUserLogin = req.body;
       const validUser: User = await userRepository.verifyLogin(userData);
-      let userWallet: Wallet = await walletRepository.retrieveById(validUser.id);
-      if (!userWallet) {
-        userWallet = await walletRepository.create(validUser.id);
+      const isValidPass = await compare(userData.password, validUser.password_hash);
+      //CHECK FOR USER VERIFIED AND EXISTING
+      if (validUser.active === 0) {
+        res.status(400).send({
+          message: 'Please confirm your account by OTP and try again!'
+        });
+      } else if (!validUser || !isValidPass) {
+        res.status(400).send({
+          message: 'You have entered an invalid email address or password!'
+        });
+      } else {
+        //CREATE TOKEN
+        const token = await userRepository.tokenBuilder(validUser);
+        let userWallet: Wallet = await walletRepository.retrieveById(validUser.id);
+        if (!userWallet) {
+          userWallet = await walletRepository.create(validUser.id);
+        }
+        res.status(200).send({ user: validUser, wallet: userWallet, token: token });
       }
-      res.status(200).send({ user: validUser, wallet: userWallet });
     } catch (err) {
       res.status(500).send({
         message: "User not exists!."
+      });
+    }
+  }
+
+  async emailVerify(req: Request, res: Response) {
+    try {
+      const email: string = req.body.email;
+      const otp: number = parseInt(req.body.otp);
+      const validUser: User = await userRepository.retrieveByEmail(email);
+      if (validUser && validUser.registerOTP === otp) {
+        await userRepository.activateUser(email);
+        res.status(200).send({result: true });  
+      } else {
+        res.status(200).send({result: false });  
+      }
+    } catch (err) {
+      res.status(500).send({
+        message: "Email not exists!."
+      });
+    }
+  }
+
+  async generateOtp(req: Request, res: Response) {
+    try {
+      const email: string = req.body.email;
+      //GENERATE OTP FOR MAIL VERIFICATION
+      let tokenExpiration: any = new Date();
+      tokenExpiration = tokenExpiration.setMinutes(
+          tokenExpiration.getMinutes() + 10
+      );
+
+      const registerOTP: number = parseInt(generateOtp(6));
+      const otpExpiration: any = moment(new Date(tokenExpiration)).format('YYYYMMDD');
+      const validUser: User = await userRepository.updateOtpByEmail(email, registerOTP, otpExpiration);
+      
+      if (validUser) {
+        const emailTemplate = verifyEmail(registerOTP.toString(), validUser.full_name);
+        const mailService = MailService.getInstance();
+        await mailService.sendMail(req.headers['X-Request-Id'] as string, {
+          to: `"${req.body.full_name}" ${req.body.email}`,
+          subject: 'GoZisk Account Verify OTP',
+          html: emailTemplate.html,
+        });
+        res.status(200).send({ result: true, message: 'Please check email for new OTP!' });
+      } else {
+        res.status(200).send({ result: false, message: 'Email not exists!' });
+      }
+    } catch (err) {
+      res.status(500).send({
+        message: "Email not exists!."
       });
     }
   }

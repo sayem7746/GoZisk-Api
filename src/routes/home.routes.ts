@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { welcome } from "../controllers/home.controller";
+import { welcome, email } from "../controllers/home.controller";
 
 class HomeRoutes {
   router = Router();
@@ -10,6 +10,8 @@ class HomeRoutes {
 
   intializeRoutes() {
     this.router.get("/", welcome);
+    this.router.get("/email-test", email);
+    this.router.get("/health", welcome);
   }
 }
 
