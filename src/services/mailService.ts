@@ -1,6 +1,10 @@
 import nodemailer from 'nodemailer';
 import { MailInterface } from '../interfaces';
 
+import dotenv from 'dotenv';
+dotenv.config();
+
+
 export default class MailService {
     private static instance: MailService;
     private transporter: any;
