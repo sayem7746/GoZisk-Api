@@ -25,6 +25,18 @@ class PackageRepository implements IPackageRepository {
       });
     });
   }
+  
+  retrieveMyAll(userId: number): Promise<Package[]> {
+    let query: string = `SELECT * FROM purchase_package
+    WHERE user_id = ${userId}`;
+
+    return new Promise((resolve, reject) => {
+      connection.query<Package[]>(query, (err, res) => {
+        if (err) reject(err);
+        else resolve(res);
+      });
+    });
+  }
 
   retrieveById(packageId: number): Promise<Package> {
     return new Promise((resolve, reject) => {

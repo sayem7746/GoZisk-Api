@@ -122,8 +122,8 @@ class ArbitrageRepository implements IArbitrageRepository {
     userWallet.forEach((wallet: Wallet) => {
       userProfitPercent = userMaxProfitPercent = userArbitrageProfit = 0;
       userProfitPercent = Math.round(((profit_percentage * 70) / 100) * 10000) / 10000;
-      userMaxProfitPercent = this.getInvestMaxPercentage(wallet.invest_wallet);
-      userProfitPercent = (userProfitPercent > userMaxProfitPercent) ? userMaxProfitPercent : userProfitPercent;
+      // userMaxProfitPercent = this.getInvestMaxPercentage(wallet.invest_wallet);
+      // userProfitPercent = (userProfitPercent > userMaxProfitPercent) ? userMaxProfitPercent : userProfitPercent;
 
       userArbitrageProfit = Math.round(((wallet.invest_wallet * userProfitPercent) / 100) * 10000) / 10000;
       this.saveUserProfit(userArbitrageProfit, wallet);

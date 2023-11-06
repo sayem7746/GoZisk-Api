@@ -16,8 +16,14 @@ class PackageRoutes {
     // Retrieve a single Package with id
     this.router.get("/:id", this.controller.findOne);
     
+    // Retrieve a single Package with id
+    this.router.get("/my-packages/:id", this.controller.myPackages);
+    
     // Purchase package
     this.router.post("/purchase", this.controller.purchase);
+    
+    // Purchase withdraw
+    this.router.post("/withdraw", this.controller.withdraw);
   }
 }
 

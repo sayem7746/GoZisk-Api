@@ -24,6 +24,19 @@ export default class PackageController {
     }
   }
 
+  async myPackages(req: Request, res: Response) {
+    const userId = parseInt(req.params.id);
+    try {
+      const investmentPackages = await packageRepository.retrieveMyAll(userId);
+
+      res.status(200).send(investmentPackages);
+    } catch (err) {
+      res.status(500).send({
+        message: "Some error occurred while retrieving investmentPackages."
+      });
+    }
+  }
+
   async findOne(req: Request, res: Response) {
     const id: number = parseInt(req.params.id);
 
@@ -93,6 +106,21 @@ export default class PackageController {
           message: `Wallet balance is not enough.`
         });
       }
+    } catch (err) {
+      res.status(500).send({
+        message: `Error purchaseing package.`
+      });
+    }
+  }
+
+  async withdraw(req: Request, res: Response) {
+    const packageId = parseInt(req.body.packageId)
+    
+    try {
+      
+      res.status(200).send({
+        message: `Package withdraw successful!`
+      });
     } catch (err) {
       res.status(500).send({
         message: `Error purchaseing package.`
