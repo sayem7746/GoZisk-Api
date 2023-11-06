@@ -61,6 +61,50 @@ class PackageRepository implements IPackageRepository {
   }
 
 
+  getPairingRowData(userId: number): Promise<any> {
+    return new Promise((resolve, reject) => {
+      connection.query<any[]>(
+        "SELECT * FROM pairing WHERE user_id = ?",
+        [userId],
+        (err, res) => {
+          if (err) reject(err);
+          else resolve(res?.[0]);
+        }
+      );
+    });
+  }
+
+  createPairEntry(userId: number, amount: number, type: string = 'create'): Promise<any> {
+    if (type === 'create') {
+      console.log(`INSERT INTO pairing
+      (invest, user_id)
+      VALUES(${userId}, ${amount})`);
+      return new Promise((resolve, reject) => {
+        connection.query<any[]>(
+          `INSERT INTO pairing
+            (invest, user_id)
+            VALUES(${amount}, ${userId})`,
+          (err, res) => {
+            if (err) reject(err);
+            else resolve(res?.[0]);
+          }
+        );
+      });
+    } else {
+      return new Promise((resolve, reject) => {
+        connection.query<any[]>(
+          `UPDATE pairing
+            SET invest= invest + ROUND(${amount}, 4)
+            WHERE user_id=${userId}`,
+          (err, res) => {
+            if (err) reject(err);
+            else resolve(res?.[0]);
+          }
+        );
+      });
+    }
+  }
+
   retrievePurchasePackageById(purchaseId: number): Promise<IPurchasePackage> {
     return new Promise((resolve, reject) => {
       connection.query<PurchasePackage[]>(

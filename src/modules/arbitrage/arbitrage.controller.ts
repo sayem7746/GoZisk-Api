@@ -53,7 +53,10 @@ export default class ArbitrageController {
 
     try {
       const allProfit = await arbitrageRepository.getArbitrageByDate(date);
-      const totalInvestment = await arbitrageRepository.getTotalInvestment(date);
+      let totalInvestment = await arbitrageRepository.getTotalInvestment(date);
+      if (!totalInvestment) {
+        totalInvestment = await arbitrageRepository.getLastInvestment();
+      }
       res.status(200).send({allProfit, totalInvestment});
     } catch (err) {
       res.status(500).send({

@@ -55,6 +55,12 @@ export default class PackageController {
       if (userWallet.net_wallet >= purchaseData.invest_amount) {
         const investDetail: IPurchasePackage = await packageRepository.purchasePackage(purchaseData);
         userWallet = await packageRepository.updateUserWallet(userWallet, purchaseData.invest_amount);
+        let pairTableEntry: any = await packageRepository.getPairingRowData(purchaseData.user_id);
+        if (!pairTableEntry) {
+          await packageRepository.createPairEntry(purchaseData.user_id, purchaseData.invest_amount);
+        } else {
+          await packageRepository.createPairEntry(purchaseData.user_id, purchaseData.invest_amount, 'update');
+        }
         await walletRepository.updateByColumn('net_wallet', userWallet.net_wallet, userWallet.user_id);
         await walletRepository.updateByColumn('invest_wallet', userWallet.invest_wallet, userWallet.user_id);
         const referenceNumber = userRepository.generateReferenceNumber();

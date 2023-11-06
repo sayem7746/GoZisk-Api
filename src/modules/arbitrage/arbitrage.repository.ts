@@ -87,6 +87,19 @@ class ArbitrageRepository implements IArbitrageRepository {
       );
     });
   }
+
+  getLastInvestment(): Promise<Arbitrage> {
+    return new Promise((resolve, reject) => {
+      connection.query<any>(
+        `SELECT * FROM arbitrage_setting
+            ORDER BY investment_date DESC LIMIT 0,1`,
+        (err, res) => {
+          if (err) reject(err);
+          else resolve(res[0]);
+        }
+      );
+    });
+  }
   
   getArbitrageById(userId: number): Promise<UserArbitrage[]> {
     return new Promise((resolve, reject) => {
