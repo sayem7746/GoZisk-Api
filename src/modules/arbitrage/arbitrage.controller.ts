@@ -48,6 +48,28 @@ export default class ArbitrageController {
     }
   }
 
+  async getLatestEightWeeks(req: Request, res: Response) {
+    const binance_ex = new binance();
+
+    try {
+      const binanceBtcHistory = arbitrageRepository.getArrayOfPrice(await binance_ex.fetchMarkOHLCV('BTC/USDT', '1w', undefined, 20), 'BTC');
+      const binanceEthHistory = arbitrageRepository.getArrayOfPrice(await binance_ex.fetchMarkOHLCV('ETH/USDT', '1w', undefined, 20), 'ETH');
+      const binanceXrpHistory = arbitrageRepository.getArrayOfPrice(await binance_ex.fetchMarkOHLCV('XRP/USDT', '1w', undefined, 20), 'XRP');
+      const binanceDogeHistory = arbitrageRepository.getArrayOfPrice(await binance_ex.fetchMarkOHLCV('DOGE/USDT', '1w', undefined, 20), 'DOGE');
+
+      res.status(200).send({
+        binanceBtcHistory,
+        binanceEthHistory,
+        binanceXrpHistory,
+        binanceDogeHistory
+      });
+    } catch (err) {
+      res.status(500).send({
+        message: "Some error occurred while retrieving exchanges."
+      });
+    }
+  }
+
   async getByDate(req: Request, res: Response) {
     const date = req.params.date;
 

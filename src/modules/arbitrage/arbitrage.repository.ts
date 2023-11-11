@@ -8,6 +8,7 @@ import walletRepository from "../wallet/wallet.repository";
 import userRepository from "../users/user.repository";
 import { Approval } from "../../models/transaction.model";
 import transactionRepository from "../../repositories/transaction.repository";
+import moment from "moment";
 
 interface IArbitrageRepository {
   save(arbitrage: Arbitrage): Promise<boolean>;
@@ -170,6 +171,15 @@ class ArbitrageRepository implements IArbitrageRepository {
       return 1.3;
     }
     return 0;
+  }
+
+  getArrayOfPrice(priceList: any[], coin: string): any[] {
+    const priceArray: number[] = [];
+    priceList.forEach(p => {
+      let toDate = moment(p[0]).format('YYYY-MM-DD h:m:s');
+      priceArray.push(Math.trunc(p[4] * 10000) / 10000);
+    })
+    return priceArray;
   }
 }
 

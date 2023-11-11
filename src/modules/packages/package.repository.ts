@@ -72,6 +72,19 @@ class PackageRepository implements IPackageRepository {
     });
   }
 
+  deletePackage(packageId: number): Promise<any> {
+    return new Promise((resolve, reject) => {
+      connection.query<OkPacket>(
+        `UPDATE purchase_package
+          SET status='withdraw'
+            WHERE id=${packageId}`,
+        (err, res) => {
+          if (err) reject(err.message);
+          else resolve(res.affectedRows);
+        }
+      );
+    });
+  }
 
   getPairingRowData(userId: number): Promise<any> {
     return new Promise((resolve, reject) => {
@@ -88,9 +101,6 @@ class PackageRepository implements IPackageRepository {
 
   createPairEntry(userId: number, amount: number, type: string = 'create'): Promise<any> {
     if (type === 'create') {
-      console.log(`INSERT INTO pairing
-      (invest, user_id)
-      VALUES(${userId}, ${amount})`);
       return new Promise((resolve, reject) => {
         connection.query<any[]>(
           `INSERT INTO pairing
@@ -117,14 +127,15 @@ class PackageRepository implements IPackageRepository {
     }
   }
 
-  retrievePurchasePackageById(purchaseId: number): Promise<IPurchasePackage> {
+  retrievePurchasePackageById(purchaseId: number, status: string = 'active'): Promise<IPurchasePackage> {
     return new Promise((resolve, reject) => {
       connection.query<PurchasePackage[]>(
-        "SELECT * FROM purchase_package WHERE id = ?",
-        [purchaseId],
+        `SELECT * FROM purchase_package WHERE id = ${purchaseId} AND status = '${status}'`,
         (err, res) => {
           if (err) reject(err);
-          else resolve(res?.[0]);
+          else {
+            resolve(res?.[0]);
+          }
         }
       );
     });
@@ -137,6 +148,33 @@ class PackageRepository implements IPackageRepository {
       net_wallet: wallet.net_wallet - amount,
       invest_wallet: wallet.invest_wallet + amount
     };
+  }
+
+  maturityDays(date: any): any {
+    let today = new Date();
+    let definedDate = new Date(date);
+    let totalDays = Math.trunc((today.getTime() - definedDate.getTime())  / (1000 * 3600 * 24));
+    return {totalDays, withdrawFee: this.getWithdrawFeeFromMaturity(totalDays)};
+  }
+
+  getWithdrawFeeFromMaturity(totalDays: number): number {
+    if (totalDays >= 30 && totalDays <= 60) {
+      return 7;
+    } else if (totalDays >= 61 && totalDays <= 90) {
+      return 6;
+    } else if (totalDays >= 91 && totalDays <= 120) {
+      return 5;
+    } else if (totalDays >= 121 && totalDays <= 150) {
+      return 4;
+    } else if (totalDays >= 151 && totalDays <= 180) {
+      return 3;
+    } else if (totalDays >= 181 && totalDays <= 210) {
+      return 2;
+    } else if (totalDays >= 211 && totalDays <= 240) {
+      return 1;
+    } else {
+      return 0;
+    }
   }
 }
 

@@ -113,17 +113,58 @@ export default class PackageController {
     }
   }
 
-  async withdraw(req: Request, res: Response) {
-    const packageId = parseInt(req.body.packageId)
+  async deletePackage(req: Request, res: Response) {
+    const packageId = parseInt(req.params.packageId)
     
     try {
-      
-      res.status(200).send({
-        message: `Package withdraw successful!`
-      });
+      const purchasePackage: IPurchasePackage = await packageRepository.retrievePurchasePackageById(packageId);
+      const packageMaturity: any = packageRepository.maturityDays(purchasePackage.modified_on);
+
+      if (packageMaturity.totalDays > 30) {
+        const transactionFee: number = purchasePackage.invest_amount * (packageMaturity.withdrawFee / 100);
+        const refundAmount: number = purchasePackage.invest_amount - transactionFee;
+        let userWallet: Wallet = await walletRepository.retrieveById(purchasePackage.user_id as number);
+        
+        // UPDATE WALLET
+        await walletRepository.updateByColumn('net_wallet', (userWallet.net_wallet + refundAmount), userWallet.user_id);
+        await walletRepository.updateByColumn('invest_wallet', (userWallet.invest_wallet - purchasePackage.invest_amount), userWallet.user_id);
+        
+        // DELETE PACKAGE
+        await packageRepository.deletePackage(packageId);
+
+        const referenceNumber: string = userRepository.generateReferenceNumber();
+
+        const transactionDetail: any = {
+          type: 'package_withdrawal',
+          amount : refundAmount,
+          balance : (userWallet.net_wallet + refundAmount),
+          reference_number : referenceNumber,
+          user_id : purchasePackage.user_id,
+          status : 'completed',
+          notes : 'Withdrawal package',
+          transaction_fee : transactionFee,
+          approval : Approval.Approved,
+          currency : 'USDT',
+          description: `Withdraw Package (maturity of ${packageMaturity.totalDays} days) with refund amount ${refundAmount}USDT.
+          Package value ${purchasePackage.invest_amount}.
+          Transaction fee: ${transactionFee}USDT`,
+        }
+        
+        await transactionRepository.create(transactionDetail);
+        
+        res.status(200).send({
+          refundAmount,
+          package: purchasePackage,
+          message: `Package withdrawal successful!`
+        });
+      } else {
+        res.status(200).send({
+          message: `Package maturity required 30 days!`
+        });
+      }
     } catch (err) {
       res.status(500).send({
-        message: `Error purchaseing package.`
+        message: `Error deleting package.`
       });
     }
   }

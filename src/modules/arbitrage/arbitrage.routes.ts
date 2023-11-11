@@ -12,6 +12,7 @@ class ArbitrageRoutes {
   intializeRoutes() {
     this.router.get("/date/:date", this.controller.getByDate);
     this.router.get("/all", this.controller.exchanges);
+    this.router.get("/latest/marketprice", this.controller.getLatestEightWeeks);
     this.router.get("/users/:id", this.controller.arbitrageById);
     this.router.get("/calculate", this.controller.arbitrageCalculate);
     this.router.get("/calculate/date/:date", this.controller.arbitrageCalculate);
