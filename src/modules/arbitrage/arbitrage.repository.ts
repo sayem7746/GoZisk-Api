@@ -1,7 +1,7 @@
 import { OkPacket } from "mysql2";
 import connection from "../../db";
 
-import Arbitrage from "./arbitrage.model";
+import Arbitrage, { IArbitrageProfit } from "./arbitrage.model";
 import UserArbitrage from "./arbitrage.model";
 import Wallet from "../wallet/wallet.model";
 import walletRepository from "../wallet/wallet.repository";
@@ -41,7 +41,7 @@ class ArbitrageRepository implements IArbitrageRepository {
   getLastMatch(): Promise<any> {
     return new Promise((resolve, reject) => {
       connection.query<any>(
-        "SELECT * FROM arbitrage WHERE profit_percentage >= 0.05 ORDER BY id DESC LIMIT 1",
+        "SELECT * FROM arbitrage WHERE status = 1 ORDER BY id DESC LIMIT 1",
         (err, res) => {
           if (err) reject(err);
           else resolve(res?.[0]);
@@ -54,7 +54,7 @@ class ArbitrageRepository implements IArbitrageRepository {
     return new Promise((resolve, reject) => {
       connection.query<any>(
         `SELECT SUM(profit_percentage) profit FROM arbitrage
-            WHERE  profit_percentage > 0.03 AND modified_on BETWEEN '${date} 00:00:00' AND '${date} 23:59:00'`,
+            WHERE  status = 1 AND modified_on BETWEEN '${date} 00:00:00' AND '${date} 23:59:00'`,
         (err, res) => {
           if (err) reject(err);
           else resolve(res[0].profit);
@@ -67,7 +67,7 @@ class ArbitrageRepository implements IArbitrageRepository {
     return new Promise((resolve, reject) => {
       connection.query<any>(
         `SELECT * FROM arbitrage
-            WHERE  profit_percentage > 0.03 AND modified_on BETWEEN '${date} 00:00:00' AND '${date} 23:59:00'`,
+            WHERE  profit_percentage > 0.03 AND status = 1 AND modified_on BETWEEN '${date} 00:00:00' AND '${date} 23:59:00'`,
         (err, res) => {
           if (err) reject(err);
           else resolve(res);
@@ -115,6 +115,24 @@ class ArbitrageRepository implements IArbitrageRepository {
       );
     });
   }
+  
+  getHourlyArbitrageByDate(date: string): Promise<IArbitrageProfit[]> {
+    return new Promise((resolve, reject) => {
+      connection.query<IArbitrageProfit[]>(
+        `SELECT a.id, a.status,
+          DATE_FORMAT(a.modified_on , '%Y-%m-%d %H:00:00') AS hour_group, a.profit_percentage,
+          DATE_FORMAT(a.modified_on , '%H') AS hour
+          FROM  arbitrage a
+            WHERE modified_on LIKE "${date}%"
+              GROUP BY hour_group, profit_percentage, id
+                ORDER BY hour_group DESC;`,
+        (err, res) => {
+          if (err) reject(err);
+          else resolve(res);
+        }
+      );
+    });
+  }
 
   async calcArbitrageProfit(profit_percentage: number, userWallet: Wallet[], todayDate: string) {
     let userProfitPercent: number = 0;
@@ -122,9 +140,7 @@ class ArbitrageRepository implements IArbitrageRepository {
     let userArbitrageProfit: number = 0;
     userWallet.forEach((wallet: Wallet) => {
       userProfitPercent = userMaxProfitPercent = userArbitrageProfit = 0;
-      userProfitPercent = Math.round(((profit_percentage * 70) / 100) * 10000) / 10000;
-      // userMaxProfitPercent = this.getInvestMaxPercentage(wallet.invest_wallet);
-      // userProfitPercent = (userProfitPercent > userMaxProfitPercent) ? userMaxProfitPercent : userProfitPercent;
+      userProfitPercent = this.getUserProfitPercent(profit_percentage, wallet.invest_wallet);
 
       userArbitrageProfit = Math.round(((wallet.invest_wallet * userProfitPercent) / 100) * 10000) / 10000;
       this.saveUserProfit(userArbitrageProfit, wallet);
@@ -133,6 +149,24 @@ class ArbitrageRepository implements IArbitrageRepository {
       walletRepository.calcRoiBonus(wallet.username, wallet.referrer_id, userArbitrageProfit);
       
     });
+  }
+
+  private getUserProfitPercent(profit: number, amount: number): number {
+    if (amount >= 100 && amount <= 500) {
+      return Math.round(((profit * 45) / 100) * 10000) / 10000;
+    } else if (amount >= 501 && amount <= 1000) {
+      return Math.round(((profit * 50) / 100) * 10000) / 10000;
+    } else if (amount >= 1001 && amount <= 5000) {
+      return Math.round(((profit * 55) / 100) * 10000) / 10000;
+    } else if (amount >= 5001 && amount <= 10000) {
+      return Math.round(((profit * 60) / 100) * 10000) / 10000;
+    } else if (amount >= 10001 && amount <= 50000) {
+      return Math.round(((profit * 65) / 100) * 10000) / 10000;
+    } else if (amount >= 50001) {
+      return Math.round(((profit * 70) / 100) * 10000) / 10000;
+    }
+    
+    return 0;
   }
 
   private saveUserProfit(userArbitrageProfit: number, wallet: any): void {
@@ -181,6 +215,57 @@ class ArbitrageRepository implements IArbitrageRepository {
     })
     return priceArray;
   }
+
+ getHourlyProfit(todayProfitList: IArbitrageProfit[]) {
+    let sortedHourlyProfit: IArbitrageProfit[] = [];
+    let totalHourlyProfit: number = 0;
+    
+    for (let i = 0; i < 24; i++) {
+      sortedHourlyProfit = todayProfitList.filter(item => parseInt(item.hour) === i)
+        .sort((a,b) => a.profit_percentage - b.profit_percentage);
+      totalHourlyProfit = 0;
+      for (const p of sortedHourlyProfit) {
+        totalHourlyProfit += p.profit_percentage;
+        if (totalHourlyProfit < 0.08) {
+          if (p.status === 0) {
+            this.updateActiveProfit(p.id);
+          }
+        } else {
+          break;
+        }
+      }
+    }
+  }
+
+  updateActiveProfit(profitId: number): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+        connection.query<OkPacket>(
+          `UPDATE arbitrage
+              SET status = 1
+              WHERE id=${profitId}`,
+          (err, res) => {
+              if (err) reject(err);
+              else resolve(true);
+              
+          }
+      );
+    });
+}
+
+
+  groupByHour(array: any[]) {
+    return array.reduce((acc, obj) => {
+      const hour = obj.hour_group.getHours();
+      const key = `${obj.timestamp.toISOString().slice(0, 13)}:00:00`; // Format: YYYY-MM-DDTHH:00:00
+      acc[key] = acc[key] || [];
+      acc[key].push(obj);
+      return acc;
+    }, {});
+  }
+}
+
+interface HourData {
+  [hour: number]: any[]; // Define the type for each hour key
 }
 
 export default new ArbitrageRepository();

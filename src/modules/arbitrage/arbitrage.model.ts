@@ -16,3 +16,11 @@ export default interface UserArbitrage extends RowDataPacket {
   profit: number;
   modified_on: string;
 }
+
+export interface IArbitrageProfit extends RowDataPacket {
+  id: number;
+  status: number;
+  hour_group: string;
+  hour: string;
+  profit_percentage: number;
+}

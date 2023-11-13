@@ -2,8 +2,9 @@ import { Request, Response } from "express";
 import arbitrageRepository from "./arbitrage.repository";
 import walletRepository from "../wallet/wallet.repository";
 import {binance, kucoin, huobi, bybit} from 'ccxt';
-import UserArbitrage from "./arbitrage.model";
+import UserArbitrage, { IArbitrageProfit } from "./arbitrage.model";
 import Wallet from "../wallet/wallet.model";
+import Arbitrage from "./arbitrage.model";
 // import nodemailer from 'nodemailer';
 
 export default class ArbitrageController {
@@ -114,6 +115,25 @@ export default class ArbitrageController {
 
       // const userAllArbitrage: UserArbitrage[] = await arbitrageRepository.getArbitrageById(userId);
       res.status(200).send({todayDate, todayProfitPercentage, allUserWallet});
+    } catch (err) {
+      res.status(500).send({
+        message: "Some error occurred while calculating arbitrage."
+      });
+    }
+  }
+  
+  async arbitrageFilter(req: Request, res: Response) {
+    let todayDate = '';
+    if (req.params.date) {
+      todayDate = req.params.date;
+    } else {
+      todayDate = new Date().toISOString().split('T')[0];
+    }
+
+    try {
+      const todayProfitPercentage: IArbitrageProfit[] = await arbitrageRepository.getHourlyArbitrageByDate(todayDate);
+      arbitrageRepository.getHourlyProfit(todayProfitPercentage);
+      res.status(200).send({todayDate, todayProfitPercentage});
     } catch (err) {
       res.status(500).send({
         message: "Some error occurred while calculating arbitrage."

@@ -16,6 +16,8 @@ class ArbitrageRoutes {
     this.router.get("/users/:id", this.controller.arbitrageById);
     this.router.get("/calculate", this.controller.arbitrageCalculate);
     this.router.get("/calculate/date/:date", this.controller.arbitrageCalculate);
+    this.router.get("/filter/date/:date", this.controller.arbitrageFilter);
+    this.router.get("/filter", this.controller.arbitrageFilter);
     this.router.post("/create", this.controller.create);
   }
 }
