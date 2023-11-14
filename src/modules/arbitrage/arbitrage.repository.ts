@@ -143,10 +143,10 @@ class ArbitrageRepository implements IArbitrageRepository {
       userProfitPercent = this.getUserProfitPercent(profit_percentage, wallet.invest_wallet);
 
       userArbitrageProfit = Math.round(((wallet.invest_wallet * userProfitPercent) / 100) * 10000) / 10000;
-      this.saveUserProfit(userArbitrageProfit, wallet);
+      this.saveUserProfit(userArbitrageProfit, wallet, todayDate);
       walletRepository.updateUserArbitrageProfit(wallet.user_id, wallet.invest_wallet, userProfitPercent, userArbitrageProfit, todayDate);
       
-      walletRepository.calcRoiBonus(wallet.username, wallet.referrer_id, userArbitrageProfit);
+      walletRepository.calcRoiBonus(wallet.username, wallet.referrer_id, userArbitrageProfit, todayDate);
       
     });
   }
@@ -169,7 +169,7 @@ class ArbitrageRepository implements IArbitrageRepository {
     return 0;
   }
 
-  private saveUserProfit(userArbitrageProfit: number, wallet: any): void {
+  private saveUserProfit(userArbitrageProfit: number, wallet: any, date: string = Date()): void {
     walletRepository.addProfitById(userArbitrageProfit, wallet.user_id).then((userWallet: Wallet) => {
       const referenceNumber = userRepository.generateReferenceNumber();
       const transactionDetail: any = {
@@ -184,6 +184,7 @@ class ArbitrageRepository implements IArbitrageRepository {
         transaction_fee: 0,
         approval: Approval.Approved,
         currency: 'USDT',
+        date: date
       };
 
       transactionRepository.create(transactionDetail);

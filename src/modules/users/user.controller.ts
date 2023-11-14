@@ -209,7 +209,7 @@ export default class UserController {
   async update(req: Request, res: Response) {
     let user: User = req.body;
     user.id = parseInt(req.params.id);
-
+    
     try {
       const num = await userRepository.update(user);
 

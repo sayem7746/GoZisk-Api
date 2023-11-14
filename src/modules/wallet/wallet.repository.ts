@@ -334,7 +334,7 @@ class WalletRepository implements IWalletRepository {
         });
     }
 
-    async calcRoiBonus(bonusFromUsername: string, userId: number, bonusValue: number, level: number = 1): Promise<boolean> {
+    async calcRoiBonus(bonusFromUsername: string, userId: number, bonusValue: number, date: string = Date(), level: number = 1): Promise<boolean> {
         let userWallet: Wallet = await this.retrieveById(userId);
         const user: User = await userRepository.retrieveById(userId);
 
@@ -371,12 +371,13 @@ class WalletRepository implements IWalletRepository {
                     transaction_fee: 0,
                     approval: Approval.Approved,
                     currency: 'USDT',
+                    date: date
                 };
 
                 await transactionRepository.create(transactionDetail);
             }
 
-            this.calcRoiBonus(bonusFromUsername, user.referrer_id, bonusValue, level + 1);
+            this.calcRoiBonus(bonusFromUsername, user.referrer_id, bonusValue, date, level + 1);
         }
         
         return true;

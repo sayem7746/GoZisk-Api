@@ -146,10 +146,20 @@ class UserRepository implements IUserRepository {
   }
 
   update(user: User): Promise<number> {
+    let updateColVal: string = '';
+    Object.keys(user).forEach(k => {
+      if (k !== 'id') {
+        if (updateColVal === '') {
+          updateColVal += `${k} = '${user[k]}'`;
+        } else {
+          updateColVal += `, ${k} = '${user[k]}'`;
+        }        
+      }
+    });
+    
     return new Promise((resolve, reject) => {
       connection.query<OkPacket>(
-        "UPDATE tutorials SET title = ?, description = ?, published = ? WHERE id = ?",
-        [user.title, user.description, user.published, user.id],
+        `UPDATE users SET ${updateColVal}  WHERE id = '${user.id}'`,
         (err, res) => {
           if (err) reject(err);
           else resolve(res.affectedRows);

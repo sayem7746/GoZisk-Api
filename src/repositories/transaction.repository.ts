@@ -21,8 +21,8 @@ class TransactionRepository implements ITransactionRepository {
         return new Promise((resolve, reject) => {
             connection.query<OkPacket>(
                 `INSERT INTO transaction 
-                    (${column_fields} date, modified) 
-                    VALUES(${column_value} now(),now())`,
+                    (${column_fields} modified) 
+                    VALUES(${column_value} now())`,
                 (err, res) => {
                     if (err) {
                         reject(err);
