@@ -32,3 +32,25 @@ export interface ICryptoTransaction extends RowDataPacket {
     send_to: string;
     send_from: string;
 }
+
+export interface IWalletAddress extends RowDataPacket {
+    id?: number;
+    user_id: number;
+    address: string;
+    network_name: string;
+    network_type: string;
+    status: string;
+    note: string;
+}
+
+export interface IWithdraw extends RowDataPacket {
+    id?: number;
+    user_id: number;
+    withdraw_amount: number;
+    address: string;
+    network: string;
+    status: string;
+    modified_on: string;
+    cancel_reason: string;
+    reference: string;
+}

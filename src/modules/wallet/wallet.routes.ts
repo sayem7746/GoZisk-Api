@@ -15,6 +15,18 @@ class UserRoutes {
     this.router.get("/pairing", this.controller.pairing);
     this.router.get("/deposit/user/:userId", this.controller.depositAddress);
     this.router.post("/deposit", this.controller.saveDeposit);
+
+    // withdrawal address
+    this.router.get("/address/all/user/:id", this.controller.allAddress);
+    this.router.get("/address/active/user/:id", this.controller.activeAddress);
+    this.router.post("/address/user/:id", this.controller.addAddress);
+    this.router.patch("/address/:id", this.controller.updateAddress);
+    this.router.delete("/address/user/:id", this.controller.deleteAddress);
+
+    // withdrawal
+    this.router.get("/withdraw/user/:id", this.controller.getAllWithdraw);
+    this.router.post("/withdraw/user/:id", this.controller.addWithdraw);
+    // this.router.patch("/withdraw/user/:id", this.controller.updateWithdraw);
   }
 }
 

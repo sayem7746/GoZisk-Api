@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import axios from 'axios';
 import walletRepository from "./wallet.repository";
-import { ICryptoTransaction } from "./wallet.model";
+import Wallet, { ICryptoTransaction, IWalletAddress, IWithdraw } from "./wallet.model";
 import userRepository from "../users/user.repository";
 import transactionRepository from "../../repositories/transaction.repository";
 import User from "../users/user.model";
@@ -100,6 +100,147 @@ export default class UserController {
                     });
                 }
                 
+            }
+            
+        } catch (err) {
+            res.status(500).send({
+                message: `Error retrieving data.`
+            });
+        }
+    }
+
+
+    async addAddress(req: Request, res: Response) {
+        const addressDetail: any = {
+            user_id: parseInt(req.params.id),
+            address: req.body.address,
+            network_name: req.body.network_name,
+            network_type: req.body.network_type,
+            status: req.body.status,
+            note: req.body.note
+        }
+
+        try {
+            const getAddress: IWalletAddress[] = await walletRepository.retrieveByAddress(addressDetail.user_id, addressDetail.address);
+            if (getAddress.length !== 0) {
+                res.status(500).send({ 'error': 'Address exists!' });
+                return;
+            }
+            const addresses: IWalletAddress[] = await walletRepository.addAddress(addressDetail);
+            
+            if (!addresses) {
+                res.status(200).send({ 'error': 'Failed to add address!' });
+            } else {
+                res.status(200).send(addresses);
+            }
+            
+        } catch (err) {
+            res.status(500).send({
+                message: `Error retrieving data.`
+            });
+        }
+    }
+
+    async updateAddress(req: Request, res: Response) {
+        const addressDetail: any = {
+            id: parseInt(req.params.id),
+            user_id: req.body.user_id,
+            status: req.body.status
+        }
+        try {
+            const addresses: IWalletAddress[] = await walletRepository.updateAddress(addressDetail);
+            if (addresses) {
+                res.status(200).send(addresses);
+            } else {
+                res.status(200).send({ 'error': 'Failed to update address!' });
+            }
+            
+        } catch (err) {
+            res.status(500).send({
+                message: `Error retrieving data.`
+            });
+        }
+    }
+
+    async allAddress(req: Request, res: Response) {
+        const user_id: number = parseInt(req.params.id)
+
+        try {
+            const addresses: IWalletAddress[] = await walletRepository.retrieveWalletAddressById(user_id);
+            res.status(200).send(addresses);
+        } catch (err) {
+            res.status(500).send({
+                message: `Error retrieving data.`
+            });
+        }
+    }
+
+    async activeAddress(req: Request, res: Response) {
+        const user_id: number = parseInt(req.params.id)
+
+        try {
+            const addresses: IWalletAddress[] = await walletRepository.retrieveWalletActiveAddressById(user_id);
+            res.status(200).send(addresses);
+        } catch (err) {
+            res.status(500).send({
+                message: `Error retrieving data.`
+            });
+        }
+    }
+
+    
+    async deleteAddress(req: Request, res: Response) {
+        const user_id: number = parseInt(req.params.id)
+        const address: string = req.body.address;
+        try {
+            const rows: number = await walletRepository.deleteAddress(user_id, address);
+            if (rows > 0) {
+                res.status(200).send({ 'success': 'successfully removed the address!' });
+            } else {
+                res.status(200).send({ 'error': 'Failed to delete address!' });
+            }
+            
+        } catch (err) {
+            res.status(500).send({
+                message: `Error retrieving data.`
+            });
+        }
+    }
+
+    
+    async addWithdraw(req: Request, res: Response) {
+        const data: any = {...req.body, user_id: parseInt(req.params.id)};
+        try {
+            const userWallet: Wallet = await walletRepository.retrieveById(data.user_id);
+            const fee = data.withdraw_amount * 0.05;
+            if (userWallet && userWallet.net_wallet > (data.withdraw_amount + fee)) {
+                const referenceNumber = userRepository.generateReferenceNumber();
+                const userWithdrawList: IWithdraw[] = await walletRepository.addWithdraw({...data, reference: referenceNumber});
+                if (userWithdrawList) {
+                    const wallet = await walletRepository.updateByColumn('net_wallet', userWallet.net_wallet - data.withdraw_amount , data.user_id);
+                    res.status(200).send(userWithdrawList);
+                } else {
+                    res.status(500).send({ 'error': 'Failed to create withdrawal!' });
+                }
+            } else {
+                res.status(500).send({ 'error': 'Wallet balance is not enough!' });
+            }
+            
+        } catch (err) {
+            res.status(500).send({
+                message: `Error retrieving data.`
+            });
+        }
+    }
+    
+    async getAllWithdraw(req: Request, res: Response) {
+        const userId: number = parseInt(req.params.id)
+        try {
+            const userWithdrawList: IWithdraw[] = await walletRepository.retrieveWithdrawalById(userId);
+            if (userWithdrawList) {
+                res.status(200).send(userWithdrawList);
+            } else {
+                res.status(200).send({ 'error': 'Failed to get list!' });
             }
             
         } catch (err) {

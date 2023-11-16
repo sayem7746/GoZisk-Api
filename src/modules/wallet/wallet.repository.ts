@@ -3,7 +3,7 @@ import axios from 'axios';
 import connection from "../../db";
 import * as moment from 'moment'
 
-import Wallet, {ICryptoTransaction, IDepositAddress, IPairing} from "./wallet.model";
+import Wallet, {ICryptoTransaction, IDepositAddress, IPairing, IWalletAddress, IWithdraw} from "./wallet.model";
 import User from "../users/user.model";
 import { Approval }from "../../models/transaction.model";
 import userRepository from "../users/user.repository";
@@ -382,6 +382,146 @@ class WalletRepository implements IWalletRepository {
         
         return true;
     }
+
+
+    // Wallet address CRUD
+    addAddress(data: IWalletAddress): Promise<IWalletAddress[]> {
+        return new Promise((resolve, reject) => {
+            connection.query<OkPacket>(
+                `INSERT INTO wallet_address 
+                    (user_id, address, network_name, network_type, status, note) 
+                    VALUES(?, ?, ?, ?, ?, ?)`,
+                [
+                    data.user_id,
+                    data.address,
+                    data.network_name,
+                    data.network_type,
+                    data.status,
+                    data.note,
+                ],
+                (err, res) => {
+                    if (err) reject(err.message);
+                    else
+                        this.retrieveWalletAddressById(data.user_id)
+                            .then((addresses: IWalletAddress[]) => resolve(addresses!))
+                            .catch(reject);
+                }
+            );
+        });
+    }
+
+    updateAddress(data: IWalletAddress): Promise<IWalletAddress[]> {
+        return new Promise((resolve, reject) => {
+            connection.query<OkPacket>(
+                `UPDATE wallet_address
+                    SET status= ?
+                    WHERE id= ?`,
+                [
+                    data.status,
+                    data.id
+                ],
+                (err, res) => {
+                    if (err) reject(err.message);
+                    else
+                        this.retrieveWalletAddressById(data.user_id)
+                            .then((addresses: IWalletAddress[]) => resolve(addresses!))
+                            .catch(reject);
+                }
+            );
+        });
+    }
+
+    retrieveWalletAddressById(userId: number): Promise<IWalletAddress[]> {
+        return new Promise((resolve, reject) => {
+            connection.query<IWalletAddress[]>(
+                "SELECT * FROM wallet_address WHERE user_id = ? AND deleted = 0",
+                [userId],
+                (err, res) => {
+                    if (err) reject(err);
+                    else resolve(res);
+                }
+            );
+        });
+    }
+
+    retrieveWalletActiveAddressById(userId: number): Promise<IWalletAddress[]> {
+        return new Promise((resolve, reject) => {
+            connection.query<IWalletAddress[]>(
+                "SELECT * FROM wallet_address WHERE user_id = ? AND status = 'active' AND deleted = 0",
+                [userId],
+                (err, res) => {
+                    if (err) reject(err);
+                    else resolve(res);
+                }
+            );
+        });
+    }
+
+    retrieveByAddress(userId: number, address: string): Promise<IWalletAddress[]> {
+        return new Promise((resolve, reject) => {
+            connection.query<IWalletAddress[]>(
+                "SELECT * FROM wallet_address WHERE user_id = ? AND address = ? AND deleted = 0",
+                [userId, address],
+                (err, res) => {
+                    if (err) reject(err);
+                    else resolve(res);
+                }
+            );
+        });
+    }
+
+    deleteAddress(userId: number, address: string): Promise<number> {
+        return new Promise((resolve, reject) => {
+            connection.query<OkPacket>(
+                `DELETE FROM wallet_address
+                    WHERE user_id = ? AND address = ?`,
+                [userId, address],
+                (err, res) => {
+                    if (err) reject(err);
+                    else resolve(res.affectedRows);
+                }
+            );
+        });
+    }
+
+    // Withdraw CRUD
+    addWithdraw(data: IWithdraw): Promise<IWithdraw[]> {
+        return new Promise((resolve, reject) => {
+            connection.query<OkPacket>(
+                `INSERT INTO withdraw
+                    (user_id, withdraw_amount, address, network, reference)
+                    VALUES(?, ?, ?, ?, ?)`,
+                [
+                    data.user_id,
+                    data.withdraw_amount,
+                    data.address,
+                    data.network,
+                    data.reference
+                ],
+                (err, res) => {
+                    if (err) reject(err.message);
+                    else
+                        this.retrieveWithdrawalById(data.user_id)
+                            .then((withdrawList: IWithdraw[]) => resolve(withdrawList!))
+                            .catch(reject);
+                }
+            );
+        });
+    }
+
+    retrieveWithdrawalById(userId: number): Promise<IWithdraw[]> {
+        return new Promise((resolve, reject) => {
+            connection.query<IWithdraw[]>(
+                "SELECT * FROM withdraw WHERE user_id = ?",
+                [userId],
+                (err, res) => {
+                    if (err) reject(err);
+                    else resolve(res);
+                }
+            );
+        });
+    }
+
 }
 
 export default new WalletRepository();
