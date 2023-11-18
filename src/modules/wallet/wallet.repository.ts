@@ -122,9 +122,10 @@ class WalletRepository implements IWalletRepository {
     retrieveAllPairing(): Promise<IPairing[]> {
         return new Promise((resolve, reject) => {
             connection.query<IPairing[]>(
-                `SELECT p.*, u.referrer_id
+                `SELECT p.*, u.referrer_id, w.invest_wallet personal_invest
                     FROM pairing p
-                        LEFT JOIN users u on p.user_id = u.id`,
+                        LEFT JOIN users u on p.user_id = u.id
+                        LEFT JOIN wallet w on w.user_id = p.user_id`,
                 (err, res: IPairing[]) => {
                     if (err) reject(err);
                     else resolve(res);
@@ -257,11 +258,11 @@ class WalletRepository implements IWalletRepository {
             curUserTotal = 0;
             curUserTotal = (p.invest + this.getTotalInvest(p.user_id, allPairs));
             total += curUserTotal;
-            
             pairingLegs.push({
                 user_id: p.user_id,
                 invest: p.invest,
-                totalBellowInvest: (curUserTotal + p.carry_forward)
+                totalBellowInvest: (curUserTotal + p.carry_forward),
+                personal_invest: p.personal_invest
             });
         });
 
@@ -280,23 +281,34 @@ class WalletRepository implements IWalletRepository {
     }
 
     // CALCULATE PAIRING BONUS
-    async calculatePairing(user_id: number,userPairLegs: any): Promise<void> {
+    async calculatePairing(user_id: number, userPairLegs: any): Promise<void> {
         let totalPairValue: number = 0;
         let totalLegs: number = userPairLegs.length;
+        let totalSponsorValue: number = 0;
         let remainCarryForward = 0;
+        // console.log(userPairLegs);
         userPairLegs.forEach((leg: any, i: number) => {
             if ((i+1) !== totalLegs) {
                 totalPairValue += leg.totalBellowInvest;
+                totalSponsorValue += leg.personal_invest;
                 this.updateUserPairStatus({...leg, totalBellowInvest: 0});
             } else {
                 remainCarryForward = leg.totalBellowInvest - totalPairValue;
+                totalSponsorValue += leg.personal_invest;
                 this.updateUserPairStatus({...leg, totalBellowInvest: remainCarryForward < 0 ? 0 : remainCarryForward});
             }
         });
+        
+        // capping pairing value by sponsor/introducer investment
+        let maximumPairProfit = totalSponsorValue * 2;
+        let totalPairedProfit = totalPairValue * 0.05;
+        let profit = totalPairedProfit > maximumPairProfit ? maximumPairProfit : totalPairedProfit;
+        
+        // maximum pairing profit
+        profit = profit > 5000 ? 5000 : profit;
 
-        let profit = totalPairValue * 0.05;
         const userWallet: Wallet = await this.retrieveById(user_id);
-        if (profit > 0 && userWallet.invest_wallet > 100) {
+        if (profit > 0 && userWallet.invest_wallet >= 100) {
             const updatedUserWallet: Wallet = await this.addProfitById(profit, user_id);
 
             const referenceNumber = userRepository.generateReferenceNumber();
