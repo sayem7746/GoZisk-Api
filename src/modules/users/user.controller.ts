@@ -228,6 +228,42 @@ export default class UserController {
       });
     }
   }
+  
+  async updatePassword(req: Request, res: Response) {
+    let oldPassword: string = req.body.old_password;
+    let newPassword: string = req.body.new_password;
+    let userId = parseInt(req.params.id);
+    
+    try {
+      const userData = await userRepository.retrieveById(userId);
+
+      if (userData) {
+        const isValidPass = await compare(oldPassword, userData.password_hash);
+
+        if (isValidPass) {
+          let hashPassword = await hash(newPassword, 12);
+          const affectedRows = await userRepository.updatePassword(userId, hashPassword);
+          if (affectedRows > 0) {
+            res.send({
+              message: "User password updated successfully."
+            });
+          } else {
+            res.status(500).send({
+              message: `Password update failed. try again later!`
+            });
+          }
+        } else {
+          res.status(500).send({
+            message: `Old password didn't match!`
+          });
+        }
+      }
+    } catch (err) {
+      res.status(500).send({
+        message: `Error updating User password.`
+      });
+    }
+  }
 
   async delete(req: Request, res: Response) {
     const id: number = parseInt(req.params.id);

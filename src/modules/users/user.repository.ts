@@ -130,6 +130,19 @@ class UserRepository implements IUserRepository {
       );
     });
   }
+  
+  updatePassword(userId: number, passwordHash: string): Promise<number> {
+    console.log(`UPDATE users SET password_hash = ${passwordHash}  WHERE id = '${userId}'`);
+    return new Promise((resolve, reject) => {
+      connection.query<OkPacket>(
+        `UPDATE users SET password_hash = '${passwordHash}'  WHERE id = '${userId}'`,
+        (err, res) => {
+          if (err) reject(err);
+          else resolve(res.affectedRows);
+        }
+      );
+    });
+  }
 
   updateOtpByEmail(email: string, registerOTP: number, otpExpiration: any): Promise<User> {
     return new Promise((resolve, reject) => {

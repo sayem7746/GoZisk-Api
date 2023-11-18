@@ -88,6 +88,31 @@ export default class ArbitrageController {
     }
   }
 
+  async arbitrageBidsByDate(req: Request, res: Response) {
+    let date = '';
+    if (req.params.date) {
+      date = req.params.date;
+    } else {
+      date = new Date().toISOString().split('T')[0];
+    }
+
+    try {
+      const allProfit = await arbitrageRepository.getArbitrageByDate(date);
+      if (allProfit) {
+        res.status(200).send(allProfit);  
+      } else {
+        res.status(500).send({
+          message: "Some error occurred while retrieving arbitrage data."
+        });
+      }
+      
+    } catch (err) {
+      res.status(500).send({
+        message: "Some error occurred while retrieving arbitrage data."
+      });
+    }
+  }
+
   async arbitrageById(req: Request, res: Response) {
     const userId: number = parseInt(req.params.id);
     try {
