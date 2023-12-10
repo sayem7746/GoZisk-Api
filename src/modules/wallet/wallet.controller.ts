@@ -92,7 +92,7 @@ export default class UserController {
                         approval : Approval.Approved,
                         currency : 'USDT',
                       };
-                    await transactionRepository.create(transactionDetail);
+                    await transactionRepository.create(transactionDetail, true);
                     res.status(200).send(saveTransaction);
                 } else {
                     res.status(500).send({

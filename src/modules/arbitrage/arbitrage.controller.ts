@@ -5,9 +5,56 @@ import {binance, kucoin, huobi, bybit} from 'ccxt';
 import UserArbitrage, { IArbitrageProfit } from "./arbitrage.model";
 import Wallet from "../wallet/wallet.model";
 import Arbitrage from "./arbitrage.model";
-// import nodemailer from 'nodemailer';
+import * as OneSignal from '@onesignal/node-onesignal';
+import dotenv from 'dotenv';
+import userRepository from "../users/user.repository";
+import transactionRepository from "../../repositories/transaction.repository";
+import { Approval } from "../../models/transaction.model";
+dotenv.config();
+
+const ONESIGNAL_APP_ID: any = process.env.ONESIGNAL_APP_ID;
+const app_key_provider: any = {
+  getToken(): any {
+      return process.env.ONESIGNAL_REST_API_KEY;
+  }
+};
+const configuration = OneSignal.createConfiguration({
+  authMethods: {
+      app_key: {
+        tokenProvider: app_key_provider
+      }
+  }
+});
+const client = new OneSignal.DefaultApi(configuration);
 
 export default class ArbitrageController {
+  async notify(req: Request, res: Response) {
+    const userId: number = parseInt(req.params.userId);
+    try {
+
+      const transactionDetail: any = {
+        description: `500USDT Deposited to wallet`,
+        type: 'deposit',
+        amount: 500,
+        balance: 5000,
+        reference_number: 'ASDFS23423SFDFS',
+        user_id: userId,
+        status: 'completed',
+        notes: 'Deposit money',
+        transaction_fee: 0,
+        approval: Approval.Approved,
+        currency: 'USDT',
+      };
+      await transactionRepository.create(transactionDetail, true);
+
+      res.status(200).send('Successful!');
+    } catch (err) {
+      res.status(500).send({
+        message: "Some error occurred while saving data."
+      });
+    }
+  }
+
   async create(req: Request, res: Response) {
     const data = req.body;
 

@@ -187,7 +187,7 @@ class ArbitrageRepository implements IArbitrageRepository {
         date: date
       };
 
-      transactionRepository.create(transactionDetail);
+      transactionRepository.create(transactionDetail, true);
     });
   }
 

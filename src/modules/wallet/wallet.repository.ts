@@ -326,7 +326,7 @@ class WalletRepository implements IWalletRepository {
                 currency: 'USDT',
             };
 
-            await transactionRepository.create(transactionDetail);
+            await transactionRepository.create(transactionDetail, true);
         }
     }
 

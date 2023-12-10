@@ -21,6 +21,7 @@ class ArbitrageRoutes {
     this.router.get("/bids/date/:date", this.controller.arbitrageBidsByDate);
     this.router.get("/bids", this.controller.arbitrageBidsByDate);
     this.router.post("/create", this.controller.create);
+    this.router.post("/onesignal/user/:userId", this.controller.notify);
   }
 }
 
