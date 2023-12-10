@@ -50,6 +50,9 @@ class TransactionRepository implements ITransactionRepository {
                 headings: {
                     en: transaction.notes
                 },
+                data: {
+                    reference_number: transaction.reference_number
+                },
                 filters: [
                     { "field": "tag", "key": "refer_code", "relation": "=", "value": user.refer_code }
                 ]
