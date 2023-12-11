@@ -24,9 +24,11 @@ class UserRoutes {
     this.router.delete("/address/user/:id", this.controller.deleteAddress);
 
     // withdrawal
+    this.router.get("/withdrawal-list", this.controller.getAllPendingWithdrawal);
     this.router.get("/withdraw/user/:id", this.controller.getAllWithdraw);
     this.router.post("/withdraw/user/:id", this.controller.addWithdraw);
-    // this.router.patch("/withdraw/user/:id", this.controller.updateWithdraw);
+    this.router.post("/withdraw/approve", this.controller.approveWithdrawal);
+    this.router.post("/withdraw/reject", this.controller.rejectWithdrawal);
   }
 }
 

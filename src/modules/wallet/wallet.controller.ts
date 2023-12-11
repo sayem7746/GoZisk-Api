@@ -233,12 +233,119 @@ export default class UserController {
         }
     }
     
+    async approveWithdrawal(req: Request, res: Response) {
+        const withdrawalId = parseInt(req.body.withdrawalId);
+        try {
+            const selectedWithdrawal: IWithdraw = await walletRepository.retrieveWithdrawalById(withdrawalId);
+            
+            if (selectedWithdrawal && selectedWithdrawal.status === 'pending') {
+                const userWallet: Wallet = await walletRepository.retrieveById(selectedWithdrawal.user_id);
+                const fee = selectedWithdrawal.withdraw_amount * 0.05;
+
+                if (userWallet && userWallet.net_wallet > fee) {
+                    const referenceNumber = selectedWithdrawal.reference;
+                    await walletRepository.updateByColumn('net_wallet', userWallet.net_wallet - fee , selectedWithdrawal.user_id);
+                    await walletRepository.updateWithdraw(selectedWithdrawal.id!, 'status', "'approved'");
+                    // save the transactioin
+                    const transactionDetail: any = {
+                        description: `${selectedWithdrawal.withdraw_amount}USDT Withdrawan to the address ${selectedWithdrawal.address}`,
+                        type: 'withdraw',
+                        amount : selectedWithdrawal.withdraw_amount,
+                        balance : userWallet.net_wallet - fee,
+                        reference_number : referenceNumber,
+                        user_id : selectedWithdrawal.user_id,
+                        status : 'completed',
+                        notes : 'Withdraw money',
+                        transaction_fee : fee,
+                        approval : Approval.Approved,
+                        currency : 'USDT',
+                        };
+                    await transactionRepository.create(transactionDetail, true);
+                    const latestWithdrawList: IWithdraw[] = await walletRepository.retrieveWithdrawal();
+                    res.status(200).send(latestWithdrawList);
+                } else {
+                    res.status(500).send({ 'error': 'Wallet balance is not enough!' });
+                }    
+            } else {
+                res.status(500).send({ 'error': 'Something goes wrong!' });
+            }
+            
+            
+        } catch (err) {
+            res.status(500).send({
+                message: `Error retrieving data.`
+            });
+        }
+    }
+
+
+    async rejectWithdrawal(req: Request, res: Response) {
+        const withdrawalId = parseInt(req.body.withdrawalId);
+        const rejectMsg = req.body.message;
+        try {
+            const selectedWithdrawal: IWithdraw = await walletRepository.retrieveWithdrawalById(withdrawalId);
+            
+            if (selectedWithdrawal && selectedWithdrawal.status === 'pending') {
+                const userWallet: Wallet = await walletRepository.retrieveById(selectedWithdrawal.user_id);
+                if (userWallet) {
+                    const referenceNumber = selectedWithdrawal.reference;
+                    await walletRepository.updateByColumn('net_wallet', userWallet.net_wallet +  selectedWithdrawal.withdraw_amount, selectedWithdrawal.user_id);
+                    await walletRepository.updateWithdraw(selectedWithdrawal.id!, 'status', "'rejected'");
+                    await walletRepository.updateWithdraw(selectedWithdrawal.id!, 'cancel_reason', `'${rejectMsg}'`);
+                    // save the transactioin
+                    const transactionDetail: any = {
+                        description: `Withdrawal of ${selectedWithdrawal.withdraw_amount}USDT has been rejected. ${rejectMsg}`,
+                        type: 'withdraw',
+                        amount : selectedWithdrawal.withdraw_amount,
+                        balance : userWallet.net_wallet + selectedWithdrawal.withdraw_amount,
+                        reference_number : referenceNumber,
+                        user_id : selectedWithdrawal.user_id,
+                        status : 'completed',
+                        notes : 'Withdrawal rejected',
+                        transaction_fee : 0,
+                        approval : Approval.Declined,
+                        currency : 'USDT',
+                        };
+                    await transactionRepository.create(transactionDetail, true);
+                    const latestWithdrawList: IWithdraw[] = await walletRepository.retrieveWithdrawal();
+                    res.status(200).send(latestWithdrawList);
+                } else {
+                    res.status(500).send({ 'error': 'Wallet balance is not enough!' });
+                }    
+            } else {
+                res.status(500).send({ 'error': 'Something goes wrong!' });
+            }
+            
+            
+        } catch (err) {
+            res.status(500).send({
+                message: `Error retrieving data.`
+            });
+        }
+    }
+    
     async getAllWithdraw(req: Request, res: Response) {
         const userId: number = parseInt(req.params.id)
         try {
-            const userWithdrawList: IWithdraw[] = await walletRepository.retrieveWithdrawalById(userId);
+            const userWithdrawList: IWithdraw[] = await walletRepository.retrieveWithdrawalByUserId(userId);
             if (userWithdrawList) {
                 res.status(200).send(userWithdrawList);
+            } else {
+                res.status(200).send({ 'error': 'Failed to get list!' });
+            }
+            
+        } catch (err) {
+            res.status(500).send({
+                message: `Error retrieving data.`
+            });
+        }
+    }
+    
+    async getAllPendingWithdrawal(req: Request, res: Response) {
+        try {
+            const withdrawList: IWithdraw[] = await walletRepository.retrieveWithdrawal();
+            if (withdrawList) {
+                res.status(200).send(withdrawList);
             } else {
                 res.status(200).send({ 'error': 'Failed to get list!' });
             }

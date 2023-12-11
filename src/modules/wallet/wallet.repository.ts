@@ -513,7 +513,7 @@ class WalletRepository implements IWalletRepository {
                 (err, res) => {
                     if (err) reject(err.message);
                     else
-                        this.retrieveWithdrawalById(data.user_id)
+                        this.retrieveWithdrawalByUserId(data.user_id)
                             .then((withdrawList: IWithdraw[]) => resolve(withdrawList!))
                             .catch(reject);
                 }
@@ -521,7 +521,7 @@ class WalletRepository implements IWalletRepository {
         });
     }
 
-    retrieveWithdrawalById(userId: number): Promise<IWithdraw[]> {
+    retrieveWithdrawalByUserId(userId: number): Promise<IWithdraw[]> {
         return new Promise((resolve, reject) => {
             connection.query<IWithdraw[]>(
                 "SELECT * FROM withdraw WHERE user_id = ?",
@@ -529,6 +529,50 @@ class WalletRepository implements IWalletRepository {
                 (err, res) => {
                     if (err) reject(err);
                     else resolve(res);
+                }
+            );
+        });
+    }
+
+    retrieveWithdrawalById(withdrawalId: number): Promise<IWithdraw> {
+        return new Promise((resolve, reject) => {
+            connection.query<IWithdraw[]>(
+                "SELECT * FROM withdraw WHERE id = ?",
+                [withdrawalId],
+                (err, res) => {
+                    if (err) reject(err);
+                    else resolve(res[0]);
+                }
+            );
+        });
+    }
+    
+    retrieveWithdrawal(): Promise<IWithdraw[]> {
+        return new Promise((resolve, reject) => {
+            connection.query<IWithdraw[]>(
+                `SELECT w.*, u.full_name, w2.net_wallet
+                    FROM withdraw w
+                        LEFT JOIN users u on u.id = w.user_id
+                        LEFT JOIN wallet w2 on w2.user_id  = w.user_id 
+                            WHERE status = 'pending'`,
+                (err, res) => {
+                    if (err) reject(err);
+                    else resolve(res);
+                }
+            );
+        });
+    }
+
+
+    updateWithdraw(id: number, column_fields: string, column_value: number | string): Promise<number> {
+        return new Promise((resolve, reject) => {
+            connection.query<OkPacket>(
+                `UPDATE withdraw
+                    SET ${column_fields}=${column_value}
+                    WHERE id=${id}`,
+                (err, res) => {
+                    if (err) reject(err.message);
+                    else resolve(res.affectedRows);
                 }
             );
         });

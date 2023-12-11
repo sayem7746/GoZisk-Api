@@ -8,7 +8,7 @@
     "build": "tsc",
     "dev": "nodemon",
     "start": "ts-node server.ts",
-    "tunnel": "lt --port 8080 --subdomain sam7746"
+    "tunnel": "lt --port 8080 --subdomain sayem7746"
   },
   "keywords": [
     "nodejs",
