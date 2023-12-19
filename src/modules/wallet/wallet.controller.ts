@@ -1,11 +1,14 @@
 import { Request, Response } from "express";
+import crypto from 'crypto';
+import dotenv from 'dotenv';
 import axios from 'axios';
 import walletRepository from "./wallet.repository";
 import Wallet, { ICryptoTransaction, IWalletAddress, IWithdraw } from "./wallet.model";
 import userRepository from "../users/user.repository";
 import transactionRepository from "../../repositories/transaction.repository";
-import User from "../users/user.model";
 import { Approval } from "../../models/transaction.model";
+
+dotenv.config();
 
 export default class UserController {
 
@@ -100,6 +103,82 @@ export default class UserController {
                     });
                 }
                 
+            }
+            
+        } catch (err) {
+            res.status(500).send({
+                message: `Error retrieving data.`
+            });
+        }
+    }
+
+    async savePayout(req: Request, res: Response) {
+        const body = {
+            wdrawid: req.body.wdrawid,
+            status: parseInt(req.body.status),
+            message: req.body.message,
+            txid: req.body.txid,
+            error: req.body.error
+        }
+
+        
+        try {
+            const wdDetail: IWithdraw = await walletRepository.getWithdrawTransaction(body.wdrawid);
+            console.log(body);
+            if (wdDetail.status !== 'pending') {
+                res.status(200).send({'error': 'Transaction already exits!'});
+            } else if (body.status === 0) {
+                await walletRepository.updateWithdraw(wdDetail.id!, 'txid', `'${body.txid}'`);
+                res.status(200).send({'success': 'Transaction saved successfully!'});
+            } else if (body.status === 1) {
+                const userWallet: Wallet = await walletRepository.retrieveById(wdDetail.user_id);
+                await walletRepository.updateWithdraw(wdDetail.id!, 'status', "'approved'");
+                await walletRepository.updateWithdraw(wdDetail.id!, 'txid', `'${body.txid}'`);
+                const fee = wdDetail.withdraw_amount * 0.05;
+                // save the transactioin
+                const transactionDetail: any = {
+                    description: `${wdDetail.withdraw_amount}USDT Withdrawan to the address ${wdDetail.address}`,
+                    type: 'withdraw',
+                    amount: wdDetail.withdraw_amount,
+                    balance: userWallet.net_wallet - fee,
+                    reference_number: wdDetail.reference,
+                    user_id: wdDetail.user_id,
+                    status: 'completed',
+                    notes: 'Withdraw money',
+                    transaction_fee: fee,
+                    approval: Approval.Approved,
+                    currency: 'USDT',
+                };
+                await transactionRepository.create(transactionDetail, true);
+                res.status(200).send({'success': 'Transaction saved successfully!'});
+
+            } else if (body.status === 2) {
+                const referenceNumber = wdDetail.reference;
+                const userWallet: Wallet = await walletRepository.retrieveById(wdDetail.user_id);
+                if (userWallet) {
+                    await walletRepository.updateByColumn('net_wallet', userWallet.net_wallet + wdDetail.withdraw_amount, wdDetail.user_id);
+                    await walletRepository.updateWithdraw(wdDetail.id!, 'status', "'rejected'");
+                    await walletRepository.updateWithdraw(wdDetail.id!, 'cancel_reason', `'${body.message}'`);
+                    // save the transactioin
+                    const transactionDetail: any = {
+                        description: `Withdrawal of ${wdDetail.withdraw_amount}USDT has been rejected. ${body.message}`,
+                        type: 'withdraw',
+                        amount: wdDetail.withdraw_amount,
+                        balance: userWallet.net_wallet + wdDetail.withdraw_amount,
+                        reference_number: referenceNumber,
+                        user_id: wdDetail.user_id,
+                        status: 'completed',
+                        notes: 'Withdrawal rejected',
+                        transaction_fee: 0,
+                        approval: Approval.Declined,
+                        currency: 'USDT',
+                    };
+                    await transactionRepository.create(transactionDetail, true);
+                    res.status(200).send({'success': 'Transaction saved successfully!'});
+                    
+                } else {
+                    res.status(200).send({'error': 'User wallet not found!'});
+                }
             }
             
         } catch (err) {
@@ -243,26 +322,33 @@ export default class UserController {
                 const fee = selectedWithdrawal.withdraw_amount * 0.05;
 
                 if (userWallet && userWallet.net_wallet > fee) {
-                    const referenceNumber = selectedWithdrawal.reference;
-                    await walletRepository.updateByColumn('net_wallet', userWallet.net_wallet - fee , selectedWithdrawal.user_id);
-                    await walletRepository.updateWithdraw(selectedWithdrawal.id!, 'status', "'approved'");
-                    // save the transactioin
-                    const transactionDetail: any = {
-                        description: `${selectedWithdrawal.withdraw_amount}USDT Withdrawan to the address ${selectedWithdrawal.address}`,
-                        type: 'withdraw',
-                        amount : selectedWithdrawal.withdraw_amount,
-                        balance : userWallet.net_wallet - fee,
-                        reference_number : referenceNumber,
-                        user_id : selectedWithdrawal.user_id,
-                        status : 'completed',
-                        notes : 'Withdraw money',
-                        transaction_fee : fee,
-                        approval : Approval.Approved,
-                        currency : 'USDT',
-                        };
-                    await transactionRepository.create(transactionDetail, true);
-                    const latestWithdrawList: IWithdraw[] = await walletRepository.retrieveWithdrawal();
-                    res.status(200).send(latestWithdrawList);
+                    // prepare payment gateway call.
+                    const config = {headers: {'Content-Type': 'multipart/form-data'}};
+                    const hashed = crypto.createHash('sha256')
+                        .update(
+                            userWallet.username
+                            + selectedWithdrawal.reference
+                            + selectedWithdrawal.address
+                            + selectedWithdrawal.withdraw_amount
+                            + process.env.SECRETKEY).digest("hex");
+
+                    const data: any = {
+                        username: userWallet.username,
+                        wdrawid: selectedWithdrawal.reference,
+                        address: selectedWithdrawal.address,
+                        amount: selectedWithdrawal.withdraw_amount,
+                        hashed: hashed
+                    };
+
+                    const payoutStatus = await axios.post<any>(`https://payment.gozisk.com/payout.php`, data, config);
+                    
+                    if (payoutStatus.data.status === 'ok') {
+                        await walletRepository.updateByColumn('net_wallet', userWallet.net_wallet - fee, selectedWithdrawal.user_id);
+                        const latestWithdrawList: IWithdraw[] = await walletRepository.retrieveWithdrawal();
+                        res.status(200).send({latestWithdrawList, payoutStatus});
+                    } else {
+                        res.status(200).send(payoutStatus.data);
+                    }
                 } else {
                     res.status(500).send({ 'error': 'Wallet balance is not enough!' });
                 }    

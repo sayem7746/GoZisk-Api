@@ -146,7 +146,7 @@ class ArbitrageRepository implements IArbitrageRepository {
       this.saveUserProfit(userArbitrageProfit, wallet, todayDate);
       walletRepository.updateUserArbitrageProfit(wallet.user_id, wallet.invest_wallet, userProfitPercent, userArbitrageProfit, todayDate);
       
-      walletRepository.calcRoiBonus(wallet.username, wallet.referrer_id, userArbitrageProfit, todayDate);
+      walletRepository.calcRoiBonus(wallet.username as string, wallet.referrer_id, userArbitrageProfit, todayDate);
       
     });
   }

@@ -14,6 +14,7 @@ class UserRoutes {
     this.router.get("/user/:id", this.controller.findOne);
     this.router.get("/pairing", this.controller.pairing);
     this.router.get("/deposit/user/:userId", this.controller.depositAddress);
+    // deposit callback url
     this.router.post("/deposit", this.controller.saveDeposit);
 
     // withdrawal address
@@ -25,10 +26,16 @@ class UserRoutes {
 
     // withdrawal
     this.router.get("/withdrawal-list", this.controller.getAllPendingWithdrawal);
+    // retrive user specific withdrawals
     this.router.get("/withdraw/user/:id", this.controller.getAllWithdraw);
+    // add user withdrawal
     this.router.post("/withdraw/user/:id", this.controller.addWithdraw);
+
     this.router.post("/withdraw/approve", this.controller.approveWithdrawal);
     this.router.post("/withdraw/reject", this.controller.rejectWithdrawal);
+    
+    // payout callback url
+    this.router.post("/payout", this.controller.savePayout);
   }
 }
 

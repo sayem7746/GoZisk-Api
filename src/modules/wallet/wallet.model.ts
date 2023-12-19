@@ -1,9 +1,9 @@
 import { RowDataPacket } from "mysql2"
 
 export default interface Wallet extends RowDataPacket {
-
     id: number;
     user_id: number;
+    username?: string;
     net_wallet: number;
     invest_wallet: number;
     roi_wallet: number;
@@ -53,4 +53,13 @@ export interface IWithdraw extends RowDataPacket {
     modified_on: string;
     cancel_reason: string;
     reference: string;
+    txid?: string;
+}
+
+export interface IWithdrawGatewayCallback {
+    wdrawid: string;
+    status: number; //  0-pending,1-approved,2-rejected
+    message: string;
+    txid: string;
+    error: string;
 }

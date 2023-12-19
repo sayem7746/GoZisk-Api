@@ -3,7 +3,7 @@ import axios from 'axios';
 import connection from "../../db";
 import * as moment from 'moment'
 
-import Wallet, {ICryptoTransaction, IDepositAddress, IPairing, IWalletAddress, IWithdraw} from "./wallet.model";
+import Wallet, {ICryptoTransaction, IDepositAddress, IPairing, IWalletAddress, IWithdraw, IWithdrawGatewayCallback} from "./wallet.model";
 import User from "../users/user.model";
 import { Approval }from "../../models/transaction.model";
 import userRepository from "../users/user.repository";
@@ -20,7 +20,9 @@ class WalletRepository implements IWalletRepository {
     retrieveById(userId: number): Promise<Wallet> {
         return new Promise((resolve, reject) => {
             connection.query<Wallet[]>(
-                "SELECT * FROM wallet WHERE user_id = ?",
+                `SELECT w.*, u.username FROM wallet w
+                LEFT JOIN users u ON u.id = w.user_id  
+                    WHERE w.user_id = ?`,
                 [userId],
                 (err, res) => {
                     if (err) reject(err);
@@ -94,6 +96,18 @@ class WalletRepository implements IWalletRepository {
                 `SELECT *
                     FROM crypto_transaction
                         WHERE username = '${username}' && txid = '${txid}'`,
+                (err, res) => {
+                    if (err) reject(err);
+                    else resolve(res[0]);
+                }
+            );
+        });
+    }
+
+    getWithdrawTransaction(wdrawid: string): Promise<IWithdraw> {
+        return new Promise((resolve, reject) => {
+            connection.query<IWithdraw[]>(
+                `SELECT * FROM withdraw WHERE reference = '${wdrawid}'`,
                 (err, res) => {
                     if (err) reject(err);
                     else resolve(res[0]);
