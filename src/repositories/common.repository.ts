@@ -1,0 +1,27 @@
+import { OkPacket } from "mysql2";
+import connection from "../db";
+import dotenv from 'dotenv';
+dotenv.config();
+
+import IBanner from "../models/common.model";
+
+interface IBannerRepository {
+    retrieveByCategory(category: string): Promise<IBanner[]>;
+}
+
+class BannerRepository implements IBannerRepository {
+    retrieveByCategory(category: string): Promise<IBanner[]> {
+        return new Promise((resolve, reject) => {
+            connection.query<IBanner[]>(
+                "SELECT * FROM banner WHERE category = ?",
+                [category],
+                (err, res) => {
+                    if (err) reject(err);
+                    else resolve(res);
+                }
+            );
+        });
+    }
+}
+
+export default new BannerRepository();
