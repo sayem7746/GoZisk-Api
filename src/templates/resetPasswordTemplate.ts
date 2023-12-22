@@ -79,7 +79,7 @@ const resetPassword = function (newPassword: string, full_name: string) {
       cellpadding="0" cellspacing="0" role="presentation">
       <tr>
         <td align="center"
-          style="--bg-opacity: 1; background-color: #eceff1; font-family: Montserrat, -apple-system, 'Segoe UI', sans-serif;">
+          style="--bg-opacity: 1;  background-image: linear-gradient(-180deg, #8B008B 38%, #8a69ff 100%); font-family: Montserrat, -apple-system, 'Segoe UI', sans-serif;">
           <table class="sm-w-full" style="font-family: 'Montserrat',Arial,sans-serif; width: 600px;" width="600"
             cellpadding="0" cellspacing="0" role="presentation">
             <tr>
