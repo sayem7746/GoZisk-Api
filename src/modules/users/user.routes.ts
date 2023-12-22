@@ -49,6 +49,7 @@ class UserRoutes {
     // User login
     this.router.post("/login", this.controller.login);
     this.router.post("/update-password/:id", this.controller.updatePassword);
+    this.router.post("/forget-password/", this.controller.forgetPassword);
 
   }
 }

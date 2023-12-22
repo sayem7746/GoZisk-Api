@@ -8,7 +8,7 @@ import { generateJWT } from "../../utils";
 
 interface IUserRepository {
   save(user: User): Promise<User>;
-  retrieveAll(searchParams: {title: string, published: boolean}): Promise<User[]>;
+  retrieveAll(searchParams: { title: string, published: boolean }): Promise<User[]>;
   retrieveById(userId: number): Promise<User | undefined>;
   update(user: User): Promise<number>;
   delete(userId: number): Promise<number>;
@@ -37,7 +37,7 @@ class UserRepository implements IUserRepository {
         ],
         (err, res) => {
           if (err) reject(err.message);
-          else 
+          else
             this.retrieveById(res.insertId)
               .then((user) => resolve(user!))
               .catch(reject);
@@ -59,7 +59,7 @@ class UserRepository implements IUserRepository {
     });
   }
 
-  retrieveAll(searchParams: {title?: string, published?: boolean}): Promise<User[]> {
+  retrieveAll(searchParams: { title?: string, published?: boolean }): Promise<User[]> {
     let query: string = "SELECT * FROM users";
     let condition: string = "";
 
@@ -130,7 +130,7 @@ class UserRepository implements IUserRepository {
       );
     });
   }
-  
+
   updatePassword(userId: number, passwordHash: string): Promise<number> {
     return new Promise((resolve, reject) => {
       connection.query<OkPacket>(
@@ -150,8 +150,8 @@ class UserRepository implements IUserRepository {
         (err, res) => {
           if (err) reject(err);
           else this.retrieveByEmail(email)
-          .then((user) => resolve(user!))
-          .catch(reject);
+            .then((user) => resolve(user!))
+            .catch(reject);
         }
       );
     });
@@ -165,10 +165,10 @@ class UserRepository implements IUserRepository {
           updateColVal += `${k} = '${user[k]}'`;
         } else {
           updateColVal += `, ${k} = '${user[k]}'`;
-        }        
+        }
       }
     });
-    
+
     return new Promise((resolve, reject) => {
       connection.query<OkPacket>(
         `UPDATE users SET ${updateColVal}  WHERE id = '${user.id}'`,
@@ -252,23 +252,43 @@ class UserRepository implements IUserRepository {
   }
 
 
-    //GENERATE TOKEN FOR LOGIN
-    async tokenBuilder(user: User): Promise<any> {
-      return new Promise((resolve, reject) => {
-        const accessToken = generateJWT(
-          {
-            id: user.id,
-            role: user.role_id === 1 ? 'user' : 'admin',
-            tokenType: 'access',
-          },
-          {
-            issuer: user.email,
-            subject: user.email,
-            audience: 'root',
-          }
-        );
-        resolve({accessToken: accessToken});
-      });
+  generatePassword(): string {
+    while (true) {
+      let charSet: string = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      let length = Math.floor(Math.random() * (16 - 8 + 1) + 8);
+      let hasNumber = Math.random() < 0.5;
+      let hasSpecial = Math.random() < 0.5;
+      let password = '';
+      if (hasNumber) charSet += '0123456789';
+      if (hasSpecial) charSet += '!@#$%^&*';
+      for (let i = 0; i < length; i++) {
+        password += charSet[Math.floor(Math.random() * charSet.length)];
+        if (
+          password.match(
+            /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{10,16}$/
+          )
+        ) return password;
+      }
+    }
+  }
+
+  //GENERATE TOKEN FOR LOGIN
+  async tokenBuilder(user: User): Promise<any> {
+    return new Promise((resolve, reject) => {
+      const accessToken = generateJWT(
+        {
+          id: user.id,
+          role: user.role_id === 1 ? 'user' : 'admin',
+          tokenType: 'access',
+        },
+        {
+          issuer: user.email,
+          subject: user.email,
+          audience: 'root',
+        }
+      );
+      resolve({ accessToken: accessToken });
+    });
   };
 }
 

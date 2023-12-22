@@ -1,4 +1,4 @@
-const resetPassword = function (otp: string, firstName: string) {
+const resetPassword = function (newPassword: string, full_name: string) {
     const html = `
     <!DOCTYPE html>
 <html lang="en" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -95,49 +95,55 @@ const resetPassword = function (otp: string, firstName: string) {
                 <table style="font-family: 'Montserrat',Arial,sans-serif; width: 100%;" width="100%" cellpadding="0"
                   cellspacing="0" role="presentation">
                   <tr>
-                    <td class="sm-px-24"
-                      style="--bg-opacity: 1; background-color: #ffffff; border-radius: 4px; font-family: Montserrat, -apple-system, 'Segoe UI', sans-serif; font-size: 14px; line-height: 24px; padding: 48px; text-align: left; --text-opacity: 1; color: #626262;"
-                      align="left">
+                        <td class="sm-px-24"
+                          style="--bg-opacity: 1; background-color: #ffffff;  border-radius: 4px; font-family: Montserrat, -apple-system, 'Segoe UI', sans-serif; font-size: 14px; line-height: 24px; padding: 48px; text-align: left; --text-opacity: 1; color: #626262;"
+                           align="left">
+                          <p style="font-weight: 600; font-size: 18px; margin-bottom: 0;">Dear ${full_name},</p>
 
-                      <p style="font-weight: 600; font-size: 18px; margin-bottom: 10px;margin-top: 10px">Hey ${firstName},</p>
+                          <p style="margin: 0 0 24px;">
+                            A request to reset your GoZisk account password was received.
+                            Please use the following password to log in:
+                          </p>
 
-                      <p style="margin: 0 0 24px;">
-                        This is the password reset OTP you requested from node-typescript-boilerplate. Use to reset your node-typescript-boilerplate account password.
-                      </p>
-                      
-                      <lable style="display: block; font-size: 24px; line-height: 100%; margin-bottom: 24px; --text-opacity: 1; color: #000000; text-decoration: none;">${otp}</lable>
-                      <table style="font-family: 'Montserrat',Arial,sans-serif;" cellpadding="0" cellspacing="0"
-                        role="presentation">
-                        <tr>
-                          <td
-                            style="mso-padding-alt: 16px 24px; --bg-opacity: 1; background-color: #5a39a2;  border-radius: 4px; font-family: Montserrat, -apple-system, 'Segoe UI', sans-serif;">
-                           
-                          </td>
-                        </tr>
-                      </table>
+                          <label style="display: block; font-size: 24px; line-height: 100%; margin-bottom: 24px; --text-opacity: 1; color: #000000; text-decoration: none;">${newPassword}</label>
+                          
+                          <table style="font-family: 'Montserrat',Arial,sans-serif;" cellpadding="0" cellspacing="0"
+                            role="presentation">
+                            <tr>
+                              <td
+                                style="mso-padding-alt: 16px 24px; --bg-opacity: 1; background-color: #7367f0;  border-radius: 4px; font-family: Montserrat, -apple-system, 'Segoe UI', sans-serif;">
+                                
+                              </td>
+                            </tr>
+                          </table>
 
-                      <p style="margin: 20px 0 2px;">
-                        If you did not request this password reset, please contact us immediately.
-                        <br>node-typescript-boilerplate Support
-                      </p>
-
-                      <table style="font-family: 'Montserrat',Arial,sans-serif; width: 100%;" width="100%"
-                        cellpadding="0" cellspacing="0" role="presentation">
-                        <tr>
-                          <td
-                            style="font-family: 'Montserrat',Arial,sans-serif; padding-top: 32px; padding-bottom: 32px;">
-                            <div style="--bg-opacity: 1; background-color: #eceff1; height: 1px; line-height: 1px;">
-                              &zwnj;</div>
-                          </td>
-                        </tr>
-                      </table>
-                      <p style="margin: 0 0 16px;">
-                        Have additional questions or need direct assistance? <br /> Contact our team at 
-                        <a href="mailto:chiragmehta900@gmail.com" class="hover-underline"
-                          style="--text-opacity: 1; color: #7367f0; text-decoration: none;">chiragmehta900@gmail.com</a>.
-                      </p>
-                    </td>
-                  </tr>
+                          <table style="font-family: 'Montserrat',Arial,sans-serif; width: 100%;" width="100%"
+                            cellpadding="0" cellspacing="0" role="presentation">
+                            <tr>
+                              <td
+                                style="font-family: 'Montserrat',Arial,sans-serif; padding-top: 32px; padding-bottom: 32px;">
+                                <div
+                                  style="--bg-opacity: 1; background-color: #eceff1; height: 1px; line-height: 1px;">
+                                  &zwnj;</div>
+                              </td>
+                            </tr>
+                          </table>
+                          <p style="margin: 0 0 16px;">
+                            Please change your password after login
+                          </p>
+                          <p style="margin: 0 0 16px;">
+                            If you didn't initiate this request, please contact our support team immediately.
+                            <a href="mailto:support@gozisk.com" class="hover-underline"
+                              style="--text-opacity: 1; color: #7367f0;  text-decoration: none;">support@gozisk.com</a>.
+                          </p>
+                          <p style="margin: 0 0 16px;">Thank you for choosing GoZisk!</p>
+                          <p style="margin: 0 0 16px;">
+                            <br/>
+                            Best regards,<br/>
+                            The GoZisk Team
+                        </p>
+                        </td>
+                      </tr>
                   <tr>
                     <td style="font-family: 'Montserrat',Arial,sans-serif; height: 20px;" height="20"></td>
                   </tr>
@@ -156,8 +162,8 @@ const resetPassword = function (otp: string, firstName: string) {
 
 </html>`;
     const text = `
-        Reset Password, You recently requested to reset your password for your node-typescript-boilerplate account. Copy and paste it for reset password:
-        ${otp}
+        Reset Password, You recently requested to reset your password for your GoZisk account. Copy and paste it for reset password:
+        ${newPassword}
 
 If you did not requested a password reset, please ignore this email or reply to let us know. This password reset is only valid for the next 2 hours.`;
     return {

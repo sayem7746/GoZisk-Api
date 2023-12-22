@@ -10,6 +10,7 @@ import { Approval }from "../../models/transaction.model";
 import transactionRepository from "../../repositories/transaction.repository";
 import { generateOtp } from "../../utils";
 import verifyEmail from '../../templates/verifyEmailTemplate';
+import resetPassword from '../../templates/resetPasswordTemplate';
 import MailService from "../../services/mailService";
 import moment from "moment";
 
@@ -257,6 +258,44 @@ export default class UserController {
             message: `Old password didn't match!`
           });
         }
+      }
+    } catch (err) {
+      res.status(500).send({
+        message: `Error updating User password.`
+      });
+    }
+  }
+  async forgetPassword(req: Request, res: Response) {
+    let email: string = req.body.email;
+    
+    try {
+      const userData = await userRepository.retrieveByEmail(email);
+
+      if (userData) {
+        const newPassword = userRepository.generatePassword();
+        let hashPassword = await hash(newPassword, 12);
+        const affectedRows = await userRepository.updatePassword(userData.id, hashPassword);
+        if (affectedRows > 0) {
+          res.send({
+            message: "Please check your email for new password."
+          });
+          //SEND NEW PASSWORD TO USER EMAIL
+          const emailTemplate = resetPassword(newPassword, userData.full_name);
+          const mailService = MailService.getInstance();
+          await mailService.sendMail(req.headers['X-Request-Id'] as string, {
+            to: `"${userData.full_name}" ${req.body.email}`,
+            subject: 'New password for GoZisk Account',
+            html: emailTemplate.html,
+          });
+        } else {
+          res.status(500).send({
+            message: `Password update failed. try again later!`
+          });
+        }
+      } else {
+        res.status(500).send({
+          message: `Email not found. try different email!`
+        });
       }
     } catch (err) {
       res.status(500).send({
