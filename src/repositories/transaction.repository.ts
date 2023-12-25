@@ -120,6 +120,20 @@ class TransactionRepository implements ITransactionRepository {
             );
         });
     }
+
+    updateTransactions(transId: number, read_status: number): Promise<ITransaction[]> {
+        return new Promise((resolve, reject) => {
+            connection.query<ITransaction[]>(
+                `UPDATE transaction
+                SET read_status=${read_status}
+                WHERE id=${transId}`,
+                (err, res) => {
+                    if (err) reject(err);
+                    else resolve(res);
+                }
+            );
+        });
+    }
 }
 
 export default new TransactionRepository();
