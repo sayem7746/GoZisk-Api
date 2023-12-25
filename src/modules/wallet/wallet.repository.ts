@@ -365,7 +365,7 @@ class WalletRepository implements IWalletRepository {
         const user: User = await userRepository.retrieveById(userId);
 
         if (user !== undefined && level <= 10) {
-            if (userWallet.invest_wallet > 100) {
+            if (userWallet.invest_wallet >= 100) {
                 let profit = 0;
                 switch(level) {
                     case 1: 
