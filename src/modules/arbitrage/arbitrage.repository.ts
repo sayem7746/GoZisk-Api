@@ -67,7 +67,8 @@ class ArbitrageRepository implements IArbitrageRepository {
     return new Promise((resolve, reject) => {
       connection.query<any>(
         `SELECT * FROM arbitrage
-            WHERE  profit_percentage > 0.03 AND status = 1 AND modified_on BETWEEN '${date} 00:00:00' AND '${date} 23:59:00'`,
+            WHERE  profit_percentage > 0.03 AND status = 1 AND modified_on BETWEEN '${date} 00:00:00' AND '${date} 23:59:00'
+            ORDER BY id DESC`,
         (err, res) => {
           if (err) reject(err);
           else resolve(res);
