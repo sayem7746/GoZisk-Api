@@ -4,6 +4,7 @@ import HttpError from '../utils/httpError';
 import { generateOtp } from "../utils";
 import verifyEmail from '../templates/verifyEmailTemplate';
 import IBanner from "../models/common.model";
+import ISettings from "../models/common.model";
 import commonRepository from "../repositories/common.repository";
 
 export function welcome(req: Request, res: Response): Response {
@@ -35,6 +36,18 @@ export async function getBanner(req: Request, res: Response) {
       } else {
           res.status(200).send({ 'error': 'Failed to get list!' });
       }
+      
+  } catch (err) {
+      res.status(500).send({
+          message: `Error retrieving data.`
+      });
+  }
+}
+
+export async function getSettings(req: Request, res: Response) {
+  try {
+      const app_version: ISettings[] = await commonRepository.getSettings();
+      res.status(200).send(app_version);
       
   } catch (err) {
       res.status(500).send({

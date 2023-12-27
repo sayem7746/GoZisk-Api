@@ -10,3 +10,10 @@ export default interface IBanner extends RowDataPacket {
   status: number;
   modified_on?: string;
 }
+
+export default interface ISettings extends RowDataPacket {
+  id?: number;
+  key: string;
+  value: string;
+  modified_on?: string;
+}
