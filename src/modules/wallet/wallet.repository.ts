@@ -386,7 +386,7 @@ class WalletRepository implements IWalletRepository {
 
                 const referenceNumber = userRepository.generateReferenceNumber();
                 const transactionDetail: any = {
-                    description: `Arbitrage ROI bonus ${profit} from ${bonusFromUsername}.`,
+                    description: `Arbitrage Level ${level} bonus ${profit} from ${bonusFromUsername}.`,
                     type: 'ArbitrageRoiBonus',
                     amount: profit,
                     balance: updatedUserWallet.net_wallet,
