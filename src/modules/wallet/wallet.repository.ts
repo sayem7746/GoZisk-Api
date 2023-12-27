@@ -369,16 +369,16 @@ class WalletRepository implements IWalletRepository {
                 let profit = 0;
                 switch(level) {
                     case 1: 
-                        profit = bonusValue * 0.01;
+                        profit = bonusValue * 0.1;
                         break;
                     case 2: 
-                        profit = bonusValue * 0.005;
+                        profit = bonusValue * 0.05;
                         break;
                     case 3: 
-                        profit = bonusValue * 0.0025;
+                        profit = bonusValue * 0.025;
                         break;
                     default:
-                        profit = bonusValue * 0.001;
+                        profit = bonusValue * 0.01;
                         break;
                 }
                 
