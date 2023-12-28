@@ -1,5 +1,6 @@
 import { Router } from "express";
 import PackageController from "./package.controller";
+import { auth } from "../../middleware/auth";
 
 class PackageRoutes {
   router = Router();

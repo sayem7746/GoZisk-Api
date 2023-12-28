@@ -1,5 +1,6 @@
 import { Router } from "express";
 import UserController from "./user.controller";
+import { auth } from "../../middleware/auth";
 
 class UserRoutes {
   router = Router();
@@ -12,35 +13,35 @@ class UserRoutes {
   intializeRoutes() {
 
     // Retrieve all Users
-    this.router.get("/", this.controller.findAll);
+    this.router.get("/", auth, this.controller.findAll);
 
     // Retrieve all published Users
-    this.router.get("/published", this.controller.findAllPublished);
+    this.router.get("/published", auth,this.controller.findAllPublished);
 
     // Retrieve a single User with id
-    this.router.get("/:id", this.controller.findOne);
+    this.router.get("/:id", auth,this.controller.findOne);
 
     // Update a User with id
-    this.router.put("/:id", this.controller.update);
+    this.router.put("/:id", auth,this.controller.update);
 
     // Delete a User with id
-    this.router.delete("/:id", this.controller.delete);
+    this.router.delete("/:id", auth,this.controller.delete);
 
     // Delete all Users
-    this.router.delete("/", this.controller.deleteAll);
+    this.router.delete("/", auth, this.controller.deleteAll);
 
     // Delete a User with id
-    this.router.get("/hierarchy/:id", this.controller.getHierarchy);
+    this.router.get("/hierarchy/:id", auth, this.controller.getHierarchy);
 
     // Get user transactions
-    this.router.get("/transactions/user/:userId/types/:types/limit/:limit", this.controller.transactions);
-    this.router.post("/transactions/read/:transId", this.controller.transactionRead);
+    this.router.get("/transactions/user/:userId/types/:types/limit/:limit", auth, this.controller.transactions);
+    this.router.post("/transactions/read/:transId", auth, this.controller.transactionRead);
 
     // check referral user
-    this.router.post("/referral", this.controller.checkReferral);
+    this.router.post("/referral", auth, this.controller.checkReferral);
 
     // Transfer money to another user
-    this.router.post("/transfer", this.controller.transfer);
+    this.router.post("/transfer", auth, this.controller.transfer);
 
     // Create a new User
     this.router.post("/signup", this.controller.create);
@@ -49,7 +50,7 @@ class UserRoutes {
 
     // User login
     this.router.post("/login", this.controller.login);
-    this.router.post("/update-password/:id", this.controller.updatePassword);
+    this.router.post("/update-password/:id", auth, this.controller.updatePassword);
     this.router.post("/forget-password/", this.controller.forgetPassword);
 
   }

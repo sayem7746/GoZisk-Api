@@ -1,5 +1,6 @@
 import { Router } from "express";
 import WalletController from "./wallet.controller";
+import { auth } from "../../middleware/auth";
 
 class UserRoutes {
   router = Router();
@@ -11,28 +12,29 @@ class UserRoutes {
 
   intializeRoutes() {
     // Find user's wallet
-    this.router.get("/user/:id", this.controller.findOne);
-    this.router.get("/pairing", this.controller.pairing);
-    this.router.get("/deposit/user/:userId", this.controller.depositAddress);
+    this.router.get("/user/:id", auth, this.controller.findOne);
+    this.router.get("/pairing", auth, this.controller.pairing);
+    this.router.get("/deposit/user/:userId", auth, this.controller.depositAddress);
+
     // deposit callback url
     this.router.post("/deposit", this.controller.saveDeposit);
 
     // withdrawal address
-    this.router.get("/address/all/user/:id", this.controller.allAddress);
-    this.router.get("/address/active/user/:id", this.controller.activeAddress);
-    this.router.post("/address/user/:id", this.controller.addAddress);
-    this.router.patch("/address/:id", this.controller.updateAddress);
-    this.router.delete("/address/user/:id", this.controller.deleteAddress);
+    this.router.get("/address/all/user/:id", auth, this.controller.allAddress);
+    this.router.get("/address/active/user/:id", auth, this.controller.activeAddress);
+    this.router.post("/address/user/:id", auth, this.controller.addAddress);
+    this.router.patch("/address/:id", auth, this.controller.updateAddress);
+    this.router.delete("/address/user/:id", auth, this.controller.deleteAddress);
 
     // withdrawal
-    this.router.get("/withdrawal-list", this.controller.getAllPendingWithdrawal);
+    this.router.get("/withdrawal-list", auth, this.controller.getAllPendingWithdrawal);
     // retrive user specific withdrawals
-    this.router.get("/withdraw/user/:id", this.controller.getAllWithdraw);
+    this.router.get("/withdraw/user/:id", auth, this.controller.getAllWithdraw);
     // add user withdrawal
-    this.router.post("/withdraw/user/:id", this.controller.addWithdraw);
+    this.router.post("/withdraw/user/:id", auth, this.controller.addWithdraw);
 
-    this.router.post("/withdraw/approve", this.controller.approveWithdrawal);
-    this.router.post("/withdraw/reject", this.controller.rejectWithdrawal);
+    this.router.post("/withdraw/approve", auth, this.controller.approveWithdrawal);
+    this.router.post("/withdraw/reject", auth, this.controller.rejectWithdrawal);
     
     // payout callback url
     this.router.post("/payout", this.controller.savePayout);
