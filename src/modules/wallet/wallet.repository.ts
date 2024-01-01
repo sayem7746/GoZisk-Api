@@ -363,6 +363,7 @@ class WalletRepository implements IWalletRepository {
     async calcRoiBonus(bonusFromUsername: string, userId: number, bonusValue: number, date: string = Date(), level: number = 1): Promise<boolean> {
         let userWallet: Wallet = await this.retrieveById(userId);
         const user: User = await userRepository.retrieveById(userId);
+        let note: string = '';
 
         if (user !== undefined && level <= 10) {
             if (userWallet.invest_wallet >= 100) {
@@ -370,15 +371,19 @@ class WalletRepository implements IWalletRepository {
                 switch(level) {
                     case 1: 
                         profit = bonusValue * 0.1;
+                        note = `Level ${level} earned 10% of total profit sharing ${bonusValue}$`
                         break;
                     case 2: 
                         profit = bonusValue * 0.05;
+                        note = `Level ${level} earned 5% of total profit sharing ${bonusValue}$`
                         break;
                     case 3: 
                         profit = bonusValue * 0.025;
+                        note = `Level ${level} earned 2.5% of total profit sharing ${bonusValue}$`
                         break;
                     default:
                         profit = bonusValue * 0.01;
+                        note = `Level ${level} earned 1% of total profit sharing ${bonusValue}$`
                         break;
                 }
                 
@@ -386,14 +391,14 @@ class WalletRepository implements IWalletRepository {
 
                 const referenceNumber = userRepository.generateReferenceNumber();
                 const transactionDetail: any = {
-                    description: `Arbitrage Level ${level} bonus ${profit} from ${bonusFromUsername}.`,
+                    description: `Arbitrage Level ${level} bonus ${profit}$ from ${bonusFromUsername}.`,
                     type: 'ArbitrageRoiBonus',
                     amount: profit,
                     balance: updatedUserWallet.net_wallet,
                     reference_number: referenceNumber,
                     user_id: user.id,
                     status: 'completed',
-                    notes: 'Arbitrage ROI bonus',
+                    notes: note,
                     transaction_fee: 0,
                     approval: Approval.Approved,
                     currency: 'USDT',

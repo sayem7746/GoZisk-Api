@@ -137,14 +137,15 @@ class ArbitrageRepository implements IArbitrageRepository {
 
   async calcArbitrageProfit(profit_percentage: number, userWallet: Wallet[], todayDate: string) {
     let userProfitPercent: number = 0;
+    let note: string = '';
     let userMaxProfitPercent: number = 0;
     let userArbitrageProfit: number = 0;
     userWallet.forEach((wallet: Wallet) => {
       userProfitPercent = userMaxProfitPercent = userArbitrageProfit = 0;
-      userProfitPercent = this.getUserProfitPercent(profit_percentage, wallet.invest_wallet);
+      [userArbitrageProfit, note] = this.getUserProfitPercent(profit_percentage, wallet.invest_wallet);
 
       userArbitrageProfit = Math.round(((wallet.invest_wallet * userProfitPercent) / 100) * 10000) / 10000;
-      this.saveUserProfit(userArbitrageProfit, wallet, todayDate);
+      this.saveUserProfit(userArbitrageProfit, wallet, todayDate, note);
       walletRepository.updateUserArbitrageProfit(wallet.user_id, wallet.invest_wallet, userProfitPercent, userArbitrageProfit, todayDate);
       
       walletRepository.calcRoiBonus(wallet.username as string, wallet.referrer_id, userArbitrageProfit, todayDate);
@@ -152,25 +153,25 @@ class ArbitrageRepository implements IArbitrageRepository {
     });
   }
 
-  private getUserProfitPercent(profit: number, amount: number): number {
-    if (amount >= 100 && amount <= 500) {
-      return Math.round(((profit * 45) / 100) * 10000) / 10000;
-    } else if (amount >= 501 && amount <= 1000) {
-      return Math.round(((profit * 50) / 100) * 10000) / 10000;
-    } else if (amount >= 1001 && amount <= 5000) {
-      return Math.round(((profit * 55) / 100) * 10000) / 10000;
-    } else if (amount >= 5001 && amount <= 10000) {
-      return Math.round(((profit * 60) / 100) * 10000) / 10000;
-    } else if (amount >= 10001 && amount <= 50000) {
-      return Math.round(((profit * 65) / 100) * 10000) / 10000;
-    } else if (amount >= 50001) {
-      return Math.round(((profit * 70) / 100) * 10000) / 10000;
+  private getUserProfitPercent(profit: number, amount: number): any {
+    if (amount >= 100 && amount <= 499) {
+      return [Math.round(((profit * 45) / 100) * 10000) / 10000, `45% of total Arbitrage Profit ${profit}%, remaining 55% goes to company account.`];
+    } else if (amount >= 500 && amount <= 999) {
+      return [Math.round(((profit * 50) / 100) * 10000) / 10000, `50% of total Arbitrage Profit ${profit}%, remaining 50% goes to company account.`];
+    } else if (amount >= 1000 && amount <= 4999) {
+      return [Math.round(((profit * 55) / 100) * 10000) / 10000, `55% of total Arbitrage Profit ${profit}%, remaining 45% goes to company account.`];
+    } else if (amount >= 5000 && amount <= 9999) {
+      return [Math.round(((profit * 60) / 100) * 10000) / 10000, `60% of total Arbitrage Profit ${profit}%, remaining 40% goes to company account.`];
+    } else if (amount >= 10000 && amount <= 49999) {
+      return [Math.round(((profit * 65) / 100) * 10000) / 10000, `65% of total Arbitrage Profit ${profit}%, remaining 35% goes to company account.`];
+    } else if (amount >= 50000) {
+      return [Math.round(((profit * 70) / 100) * 10000) / 10000, `70% of total Arbitrage Profit ${profit}%, remaining 30% goes to company account.`];
     }
     
-    return 0;
+    return [0, ``];
   }
 
-  private saveUserProfit(userArbitrageProfit: number, wallet: any, date: string = Date()): void {
+  private saveUserProfit(userArbitrageProfit: number, wallet: any, date: string = Date(), note: string): void {
     walletRepository.addProfitById(userArbitrageProfit, wallet.user_id).then((userWallet: Wallet) => {
       const referenceNumber = userRepository.generateReferenceNumber();
       const transactionDetail: any = {
@@ -181,7 +182,7 @@ class ArbitrageRepository implements IArbitrageRepository {
         reference_number: referenceNumber,
         user_id: wallet.user_id,
         status: 'completed',
-        notes: 'Arbitrage bonus',
+        notes: note,
         transaction_fee: 0,
         approval: Approval.Approved,
         currency: 'USDT',
