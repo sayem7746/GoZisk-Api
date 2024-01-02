@@ -14,6 +14,6 @@ export default class Routes {
     app.use("/api/users", userRoutes);
     app.use("/api/packages", auth, packageRoutes);
     app.use("/api/wallet", walletRoutes);
-    app.use("/api/arbitrage", auth, arbitrageRoutes);
+    app.use("/api/arbitrage", arbitrageRoutes);
   }
 }
