@@ -38,7 +38,7 @@ class UserRoutes {
     this.router.post("/transactions/read/:transId", auth, this.controller.transactionRead);
 
     // check referral user
-    this.router.post("/referral", auth, this.controller.checkReferral);
+    this.router.post("/referral", this.controller.checkReferral);
 
     // Transfer money to another user
     this.router.post("/transfer", auth, this.controller.transfer);
