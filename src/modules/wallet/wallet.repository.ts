@@ -371,19 +371,19 @@ class WalletRepository implements IWalletRepository {
                 switch(level) {
                     case 1: 
                         profit = bonusValue * 0.1;
-                        note = `10% of ${bonusFromUsername}'s total profit sharing ${bonusValue}$`
+                        note = `10% of ${bonusFromUsername}'s total profit sharing $${bonusValue}`
                         break;
                     case 2: 
                         profit = bonusValue * 0.05;
-                        note = `5% of ${bonusFromUsername}'s total profit sharing ${bonusValue}$`
+                        note = `5% of ${bonusFromUsername}'s total profit sharing $${bonusValue}`
                         break;
                     case 3: 
                         profit = bonusValue * 0.025;
-                        note = `2.5% of ${bonusFromUsername}'s total profit sharing ${bonusValue}$`
+                        note = `2.5% of ${bonusFromUsername}'s total profit sharing $${bonusValue}`
                         break;
                     default:
                         profit = bonusValue * 0.01;
-                        note = `1% of ${bonusFromUsername}'s total profit sharing ${bonusValue}$`
+                        note = `1% of ${bonusFromUsername}'s total profit sharing $${bonusValue}`
                         break;
                 }
                 
