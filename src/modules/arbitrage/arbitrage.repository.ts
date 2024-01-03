@@ -137,16 +137,17 @@ class ArbitrageRepository implements IArbitrageRepository {
 
   async calcArbitrageProfit(profit_percentage: number, userWallet: Wallet[], todayDate: string) {
     let userProfitPercent: number = 0;
+    let actualUserProfitPercent: number = 0;
     let note: string = '';
     let userMaxProfitPercent: number = 0;
     let userArbitrageProfit: number = 0;
     userWallet.forEach((wallet: Wallet) => {
-      userProfitPercent = userMaxProfitPercent = userArbitrageProfit = 0;
+      actualUserProfitPercent = userProfitPercent = userMaxProfitPercent = userArbitrageProfit = 0;
       if (wallet.invest_wallet >= 100) {
-        [userProfitPercent, note] = this.getUserProfitPercent(profit_percentage, wallet.invest_wallet);
+        [userProfitPercent, actualUserProfitPercent, note] = this.getUserProfitPercent(profit_percentage, wallet.invest_wallet);
         
         userArbitrageProfit = Math.round(((wallet.invest_wallet * userProfitPercent) / 100) * 10000) / 10000;
-        this.saveUserProfit(userArbitrageProfit, wallet, todayDate, note);
+        this.saveUserProfit(userArbitrageProfit, actualUserProfitPercent, wallet, todayDate, note);
         walletRepository.updateUserArbitrageProfit(wallet.user_id, wallet.invest_wallet, userProfitPercent, userArbitrageProfit, todayDate);
         
         walletRepository.calcRoiBonus(wallet.username as string, wallet.referrer_id, userArbitrageProfit, todayDate);
@@ -156,28 +157,36 @@ class ArbitrageRepository implements IArbitrageRepository {
 
   private getUserProfitPercent(profit: number, amount: number): any {
     profit = Math.round(profit * 10000) / 10000;
+    let originalUserProfit = Math.round(((amount * profit) / 100) * 10000) / 10000;
+    let companyProfit: number = 0;
     if (amount >= 100 && amount <= 499) {
-      return [Math.round(((profit * 45) / 100) * 10000) / 10000, `45% of total Arbitrage Profit ${profit}%, remaining 55% goes to company account.`];
+      companyProfit = Math.round(((originalUserProfit * 55) / 100) * 10000) / 10000;
+      return [Math.round(((profit * 45) / 100) * 10000) / 10000, 55, `Today's total profit is $${originalUserProfit} (${profit}%), remaining $${companyProfit} (55%) goes to company's account.`];
     } else if (amount >= 500 && amount <= 999) {
-      return [Math.round(((profit * 50) / 100) * 10000) / 10000, `50% of total Arbitrage Profit ${profit}%, remaining 50% goes to company account.`];
+      companyProfit = Math.round(((originalUserProfit * 50) / 100) * 10000) / 10000;
+      return [Math.round(((profit * 50) / 100) * 10000) / 10000, 50, `Today's total profit is $${originalUserProfit} (${profit}%), remaining $${companyProfit} (50%) goes to company's account.`];
     } else if (amount >= 1000 && amount <= 4999) {
-      return [Math.round(((profit * 55) / 100) * 10000) / 10000, `55% of total Arbitrage Profit ${profit}%, remaining 45% goes to company account.`];
+      companyProfit = Math.round(((originalUserProfit * 45) / 100) * 10000) / 10000;
+      return [Math.round(((profit * 55) / 100) * 10000) / 10000, 45, `Today's total profit is $${originalUserProfit} (${profit}%), remaining $${companyProfit} (45%) goes to company's account.`];
     } else if (amount >= 5000 && amount <= 9999) {
-      return [Math.round(((profit * 60) / 100) * 10000) / 10000, `60% of total Arbitrage Profit ${profit}%, remaining 40% goes to company account.`];
+      companyProfit = Math.round(((originalUserProfit * 40) / 100) * 10000) / 10000;
+      return [Math.round(((profit * 60) / 100) * 10000) / 10000, 40, `Today's total profit is $${originalUserProfit} (${profit}%), remaining $${companyProfit} (40%) goes to company's account.`];
     } else if (amount >= 10000 && amount <= 49999) {
-      return [Math.round(((profit * 65) / 100) * 10000) / 10000, `65% of total Arbitrage Profit ${profit}%, remaining 35% goes to company account.`];
+      companyProfit = Math.round(((originalUserProfit * 35) / 100) * 10000) / 10000;
+      return [Math.round(((profit * 65) / 100) * 10000) / 10000, 35, `Today's total profit is $${originalUserProfit} (${profit}%), remaining $${companyProfit} (35%) goes to company's account.`];
     } else if (amount >= 50000) {
-      return [Math.round(((profit * 70) / 100) * 10000) / 10000, `70% of total Arbitrage Profit ${profit}%, remaining 30% goes to company account.`];
+      companyProfit = Math.round(((originalUserProfit * 30) / 100) * 10000) / 10000;
+      return [Math.round(((profit * 70) / 100) * 10000) / 10000, 30, `Today's total profit is $${originalUserProfit} (${profit}%), remaining $${companyProfit} (30%) goes to company's account.`];
     }
     
     return [0, ``];
   }
 
-  private saveUserProfit(userArbitrageProfit: number, wallet: any, date: string = Date(), note: string): void {
+  private saveUserProfit(userArbitrageProfit: number, profitPercent: number, wallet: any, date: string = Date(), note: string): void {
     walletRepository.addProfitById(userArbitrageProfit, wallet.user_id).then((userWallet: Wallet) => {
       const referenceNumber = userRepository.generateReferenceNumber();
       const transactionDetail: any = {
-        description: `Arbitrage bonus $${userArbitrageProfit} out of total investment $${wallet.invest_wallet}.`,
+        description: `Arbitrage profit share $${userArbitrageProfit} (${profitPercent}%) out of $${wallet.invest_wallet} total investment.`,
         type: 'ArbitrageBonus',
         amount: userArbitrageProfit,
         balance: userWallet.net_wallet,
