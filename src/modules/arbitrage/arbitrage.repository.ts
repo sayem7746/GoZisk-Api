@@ -142,18 +142,20 @@ class ArbitrageRepository implements IArbitrageRepository {
     let userArbitrageProfit: number = 0;
     userWallet.forEach((wallet: Wallet) => {
       userProfitPercent = userMaxProfitPercent = userArbitrageProfit = 0;
-      [userArbitrageProfit, note] = this.getUserProfitPercent(profit_percentage, wallet.invest_wallet);
-
-      userArbitrageProfit = Math.round(((wallet.invest_wallet * userProfitPercent) / 100) * 10000) / 10000;
-      this.saveUserProfit(userArbitrageProfit, wallet, todayDate, note);
-      walletRepository.updateUserArbitrageProfit(wallet.user_id, wallet.invest_wallet, userProfitPercent, userArbitrageProfit, todayDate);
-      
-      walletRepository.calcRoiBonus(wallet.username as string, wallet.referrer_id, userArbitrageProfit, todayDate);
-      
+      if (wallet.invest_wallet >= 100) {
+        [userProfitPercent, note] = this.getUserProfitPercent(profit_percentage, wallet.invest_wallet);
+        
+        userArbitrageProfit = Math.round(((wallet.invest_wallet * userProfitPercent) / 100) * 10000) / 10000;
+        this.saveUserProfit(userArbitrageProfit, wallet, todayDate, note);
+        walletRepository.updateUserArbitrageProfit(wallet.user_id, wallet.invest_wallet, userProfitPercent, userArbitrageProfit, todayDate);
+        
+        walletRepository.calcRoiBonus(wallet.username as string, wallet.referrer_id, userArbitrageProfit, todayDate);
+      }
     });
   }
 
   private getUserProfitPercent(profit: number, amount: number): any {
+    profit = Math.round(profit * 10000) / 10000;
     if (amount >= 100 && amount <= 499) {
       return [Math.round(((profit * 45) / 100) * 10000) / 10000, `45% of total Arbitrage Profit ${profit}%, remaining 55% goes to company account.`];
     } else if (amount >= 500 && amount <= 999) {
