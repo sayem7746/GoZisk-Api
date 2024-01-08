@@ -161,22 +161,22 @@ class ArbitrageRepository implements IArbitrageRepository {
     let companyProfit: number = 0;
     if (amount >= 100 && amount <= 499) {
       companyProfit = Math.round(((originalUserProfit * 55) / 100) * 10000) / 10000;
-      return [Math.round(((profit * 45) / 100) * 10000) / 10000, 55, `Today's total profit is $${originalUserProfit} (${profit}%), remaining $${companyProfit} (55%) goes to company's account.`];
+      return [Math.round(((profit * 45) / 100) * 10000) / 10000, 45, `Today's total profit is $${originalUserProfit} (${profit}%), remaining $${companyProfit} (55%) goes to company's account.`];
     } else if (amount >= 500 && amount <= 999) {
       companyProfit = Math.round(((originalUserProfit * 50) / 100) * 10000) / 10000;
       return [Math.round(((profit * 50) / 100) * 10000) / 10000, 50, `Today's total profit is $${originalUserProfit} (${profit}%), remaining $${companyProfit} (50%) goes to company's account.`];
     } else if (amount >= 1000 && amount <= 4999) {
       companyProfit = Math.round(((originalUserProfit * 45) / 100) * 10000) / 10000;
-      return [Math.round(((profit * 55) / 100) * 10000) / 10000, 45, `Today's total profit is $${originalUserProfit} (${profit}%), remaining $${companyProfit} (45%) goes to company's account.`];
+      return [Math.round(((profit * 55) / 100) * 10000) / 10000, 55, `Today's total profit is $${originalUserProfit} (${profit}%), remaining $${companyProfit} (45%) goes to company's account.`];
     } else if (amount >= 5000 && amount <= 9999) {
       companyProfit = Math.round(((originalUserProfit * 40) / 100) * 10000) / 10000;
-      return [Math.round(((profit * 60) / 100) * 10000) / 10000, 40, `Today's total profit is $${originalUserProfit} (${profit}%), remaining $${companyProfit} (40%) goes to company's account.`];
+      return [Math.round(((profit * 60) / 100) * 10000) / 10000, 60, `Today's total profit is $${originalUserProfit} (${profit}%), remaining $${companyProfit} (40%) goes to company's account.`];
     } else if (amount >= 10000 && amount <= 49999) {
       companyProfit = Math.round(((originalUserProfit * 35) / 100) * 10000) / 10000;
-      return [Math.round(((profit * 65) / 100) * 10000) / 10000, 35, `Today's total profit is $${originalUserProfit} (${profit}%), remaining $${companyProfit} (35%) goes to company's account.`];
+      return [Math.round(((profit * 65) / 100) * 10000) / 10000, 65, `Today's total profit is $${originalUserProfit} (${profit}%), remaining $${companyProfit} (35%) goes to company's account.`];
     } else if (amount >= 50000) {
       companyProfit = Math.round(((originalUserProfit * 30) / 100) * 10000) / 10000;
-      return [Math.round(((profit * 70) / 100) * 10000) / 10000, 30, `Today's total profit is $${originalUserProfit} (${profit}%), remaining $${companyProfit} (30%) goes to company's account.`];
+      return [Math.round(((profit * 70) / 100) * 10000) / 10000, 70, `Today's total profit is $${originalUserProfit} (${profit}%), remaining $${companyProfit} (30%) goes to company's account.`];
     }
     
     return [0, ``];
