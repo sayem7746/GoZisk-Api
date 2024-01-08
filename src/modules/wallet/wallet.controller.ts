@@ -141,7 +141,6 @@ export default class UserController {
         
         try {
             const wdDetail: IWithdraw = await walletRepository.getWithdrawTransaction(body.wdrawid);
-            console.log(body);
             if (wdDetail.status !== 'pending') {
                 res.status(200).send({'error': 'Transaction already exits!'});
             } else if (body.status === 0) {
@@ -358,11 +357,11 @@ export default class UserController {
                     };
 
                     const payoutStatus = await axios.post<any>(`https://payment.gozisk.com/payout.php`, data, config);
-                    
                     if (payoutStatus.data.status === 'ok') {
                         await walletRepository.updateByColumn('net_wallet', userWallet.net_wallet - fee, selectedWithdrawal.user_id);
+                        await walletRepository.updateWithdraw(selectedWithdrawal.id!, 'payoutid', payoutStatus.data.payoutid);
                         const latestWithdrawList: IWithdraw[] = await walletRepository.retrieveWithdrawal();
-                        res.status(200).send({latestWithdrawList, payoutStatus});
+                        res.status(200).send({latestWithdrawList, payoutStatus: payoutStatus.data});
                     } else {
                         res.status(200).send(payoutStatus.data);
                     }
