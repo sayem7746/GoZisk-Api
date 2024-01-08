@@ -383,9 +383,10 @@ export default class UserController {
     const userId: number = parseInt(req.params.userId);
     const types: string[] = req.params.types.split(',');
     const limit: number = parseInt(req.params.limit);
+    const date: string = req.params.date !== undefined? req.params.date : '';
     
     try {
-      const transaction = await transactionRepository.getTransactions(userId, types, limit);
+      const transaction = await transactionRepository.getTransactions(userId, types, limit, date);
       res.status(200).send(transaction);
     } catch (err) {
       res.status(500).send({

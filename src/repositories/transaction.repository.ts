@@ -105,12 +105,14 @@ class TransactionRepository implements ITransactionRepository {
         });
     }
 
-    getTransactions(userId: number, types: string[], limit: number = 5): Promise<ITransaction[]> {
+    getTransactions(userId: number, types: string[], limit: number = 5, date: string): Promise<ITransaction[]> {
         const typeList: string = types.map((type: string) => `'${type}'`).join(',');
+        const dateFilter = date !== '' ? `AND date LIKE '${date}%'` : '';
+        
         return new Promise((resolve, reject) => {
             connection.query<ITransaction[]>(
                 `SELECT * FROM transaction 
-                WHERE type in (${typeList}) AND user_id = ${userId}
+                WHERE type in (${typeList}) AND user_id = ${userId} ${dateFilter}
                 ORDER BY modified DESC
                 LIMIT 0,${limit}`,
                 (err, res) => {

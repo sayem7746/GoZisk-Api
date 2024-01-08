@@ -15,6 +15,9 @@ class UserRoutes {
     this.router.get("/user/:id", auth, this.controller.findOne);
     this.router.get("/pairing", this.controller.pairing);
     this.router.get("/deposit/user/:userId", auth, this.controller.depositAddress);
+    
+    // currenct btc value
+    this.router.get("/market-value", auth, this.controller.currentValue);
 
     // deposit callback url
     this.router.post("/deposit", this.controller.saveDeposit);
@@ -27,13 +30,13 @@ class UserRoutes {
     this.router.delete("/address/user/:id", auth, this.controller.deleteAddress);
 
     // withdrawal
-    this.router.get("/withdrawal-list", auth, this.controller.getAllPendingWithdrawal);
+    this.router.get("/withdrawal-list", this.controller.getAllPendingWithdrawal);
     // retrive user specific withdrawals
     this.router.get("/withdraw/user/:id", auth, this.controller.getAllWithdraw);
     // add user withdrawal
     this.router.post("/withdraw/user/:id", auth, this.controller.addWithdraw);
 
-    this.router.post("/withdraw/approve", auth, this.controller.approveWithdrawal);
+    this.router.post("/withdraw/approve", this.controller.approveWithdrawal);
     this.router.post("/withdraw/reject", auth, this.controller.rejectWithdrawal);
     
     // payout callback url

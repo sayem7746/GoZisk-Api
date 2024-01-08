@@ -8,7 +8,8 @@ import userRepository from "../users/user.repository";
 import walletRepository from "../wallet/wallet.repository";
 import Wallet from "../wallet/wallet.model";
 import transactionRepository from "../../repositories/transaction.repository";
-import ITransaction, { Approval }from "../../models/transaction.model";
+import { Approval }from "../../models/transaction.model";
+import {binance} from 'ccxt';
 
 export default class PackageController {
   async findAll(req: Request, res: Response) {
@@ -26,10 +27,13 @@ export default class PackageController {
 
   async myPackages(req: Request, res: Response) {
     const userId = parseInt(req.params.id);
+    const binance_ex = new binance();
+
     try {
       const investmentPackages = await packageRepository.retrieveMyAll(userId);
+      const binanceBtcValue = await (await binance_ex.fetchTicker('BTC/USDT')).close as number;
 
-      res.status(200).send(investmentPackages);
+      res.status(200).send({packages: investmentPackages, btcValue: binanceBtcValue});
     } catch (err) {
       res.status(500).send({
         message: "Some error occurred while retrieving investmentPackages."

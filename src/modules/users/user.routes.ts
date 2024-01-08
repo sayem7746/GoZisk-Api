@@ -34,6 +34,7 @@ class UserRoutes {
     this.router.get("/hierarchy/:id", auth, this.controller.getHierarchy);
 
     // Get user transactions
+    this.router.get("/transactions/user/:userId/types/:types/limit/:limit/date/:date", auth, this.controller.transactions);
     this.router.get("/transactions/user/:userId/types/:types/limit/:limit", auth, this.controller.transactions);
     this.router.post("/transactions/read/:transId", auth, this.controller.transactionRead);
 

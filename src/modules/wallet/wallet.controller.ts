@@ -7,6 +7,7 @@ import Wallet, { ICryptoTransaction, IWalletAddress, IWithdraw } from "./wallet.
 import userRepository from "../users/user.repository";
 import transactionRepository from "../../repositories/transaction.repository";
 import { Approval } from "../../models/transaction.model";
+import {binance} from 'ccxt';
 
 dotenv.config();
 
@@ -14,10 +15,13 @@ export default class UserController {
 
     async findOne(req: Request, res: Response) {
         const id: number = parseInt(req.params.id);
+        const binance_ex = new binance();
+
         try {
             const userWallet = await walletRepository.retrieveById(id);
+            const binanceBtcValue = await (await binance_ex.fetchTicker('BTC/USDT')).close as number;
 
-            if (userWallet) res.status(200).send(userWallet);
+            if (userWallet) res.status(200).send({userWallet, binanceBtcValue});
             else
                 res.status(404).send({
                     message: `Cannot find User with id=${id}.`
@@ -34,6 +38,19 @@ export default class UserController {
             const pairingData = await walletRepository.retrieveAllPairing();
             res.status(200).send({pairingData});
             walletRepository.getTotalInvest(pairingData[0].user_id, pairingData);
+        } catch (err) {
+            res.status(500).send({
+                message: `Error retrieving data.`
+            });
+        }
+    }
+
+    async currentValue(req: Request, res: Response) {
+        const binance_ex = new binance();
+
+        try {
+            const binanceBtcValue = await (await binance_ex.fetchTicker('BTC/USDT')).close as number;
+            res.status(200).send({binanceBtcValue});
         } catch (err) {
             res.status(500).send({
                 message: `Error retrieving data.`
@@ -370,7 +387,7 @@ export default class UserController {
         const rejectMsg = req.body.message;
         try {
             const selectedWithdrawal: IWithdraw = await walletRepository.retrieveWithdrawalById(withdrawalId);
-            
+
             if (selectedWithdrawal && selectedWithdrawal.status === 'pending') {
                 const userWallet: Wallet = await walletRepository.retrieveById(selectedWithdrawal.user_id);
                 if (userWallet) {
@@ -393,8 +410,7 @@ export default class UserController {
                         currency : 'USDT',
                         };
                     await transactionRepository.create(transactionDetail, true);
-                    const latestWithdrawList: IWithdraw[] = await walletRepository.retrieveWithdrawal();
-                    res.status(200).send(latestWithdrawList);
+                    res.status(200).send({'success': 'Withdrawal rejected successfully!'});
                 } else {
                     res.status(500).send({ 'error': 'Wallet balance is not enough!' });
                 }    
