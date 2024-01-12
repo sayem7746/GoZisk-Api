@@ -36,7 +36,10 @@ class UserRoutes {
     // Get user transactions
     this.router.get("/transactions/user/:userId/types/:types/limit/:limit/date/:date", auth, this.controller.transactions);
     this.router.get("/transactions/user/:userId/types/:types/limit/:limit", auth, this.controller.transactions);
+    
+    // transaction read individual transaction.
     this.router.post("/transactions/read/:transId", auth, this.controller.transactionRead);
+    this.router.post("/transactions/read/all/user/:userId", auth, this.controller.transactionReadAll);
 
     // check referral user
     this.router.post("/referral", this.controller.checkReferral);

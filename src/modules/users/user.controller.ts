@@ -407,6 +407,19 @@ export default class UserController {
       });
     }
   }
+  
+  async transactionReadAll(req: Request, res: Response) {
+    const userId: number = parseInt(req.params.userId);
+    
+    try {
+      const transaction = await transactionRepository.updateTransactionsAll(userId, 1);
+      res.status(200).send(transaction);
+    } catch (err) {
+      res.status(500).send({
+        message: "Transaction list error!"
+      });
+    }
+  }
 
   async transfer(req: Request, res: Response) {
     const transferUserId: number = parseInt(req.body.transfer_user_id);
