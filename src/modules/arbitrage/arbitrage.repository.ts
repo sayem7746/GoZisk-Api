@@ -144,7 +144,7 @@ class ArbitrageRepository implements IArbitrageRepository {
     let userArbitrageProfit: number = 0;
     userWallet.forEach((wallet: Wallet) => {
       actualUserProfitPercent = userProfitPercent = userMaxProfitPercent = userArbitrageProfit = 0;
-      if (wallet.invest_wallet >= 100) {
+      if (wallet.invest_wallet >= 10) {
         [userProfitPercent, actualUserProfitPercent, note, companyShare] = this.getUserProfitPercent(profit_percentage, wallet.invest_wallet);
         
         userArbitrageProfit = Math.round(((wallet.invest_wallet * userProfitPercent) / 100) * 10000) / 10000;
@@ -160,7 +160,7 @@ class ArbitrageRepository implements IArbitrageRepository {
     profit = Math.round(profit * 10000) / 10000;
     let originalUserProfit = Math.round(((amount * profit) / 100) * 10000) / 10000;
     let companyProfit: number = 0;
-    if (amount >= 100 && amount <= 499) {
+    if (amount >= 10 && amount <= 499) {
       companyProfit = Math.round(((originalUserProfit * 55) / 100) * 10000) / 10000;
       return [Math.round(((profit * 45) / 100) * 10000) / 10000, 45, `Today Arbitrage Profit is $${originalUserProfit} (${profit}%), out of your ${amount} investment.`, `$${companyProfit} (55%)`];
     } else if (amount >= 500 && amount <= 999) {
@@ -206,7 +206,7 @@ class ArbitrageRepository implements IArbitrageRepository {
   }
 
   private getInvestMaxPercentage(amount: number): number {
-    if (amount >= 100 && amount <= 500) {
+    if (amount >= 10 && amount <= 500) {
       return 0.7;
     } else if (amount >= 501 && amount <= 1000) {
       return 0.75;

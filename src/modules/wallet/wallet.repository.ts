@@ -322,7 +322,7 @@ class WalletRepository implements IWalletRepository {
         profit = profit > 5000 ? 5000 : profit;
 
         const userWallet: Wallet = await this.retrieveById(user_id);
-        if (profit > 0 && userWallet.invest_wallet >= 100) {
+        if (profit > 0 && userWallet.invest_wallet >= 10) {
             const updatedUserWallet: Wallet = await this.addProfitById(profit, user_id);
 
             const referenceNumber = userRepository.generateReferenceNumber();
@@ -366,7 +366,7 @@ class WalletRepository implements IWalletRepository {
         let note: string = '';
 
         if (user !== undefined && level <= 10) {
-            if (userWallet.invest_wallet >= 100) {
+            if (userWallet.invest_wallet >= 10) {
                 let profit = 0;
                 switch(level) {
                     case 1: 
