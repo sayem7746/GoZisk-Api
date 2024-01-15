@@ -31,12 +31,21 @@ export default class UserController {
       });
       return;
     }
+
     if (!req.body.username) {
       res.status(400).send({
         message: "User ID can not be empty!"
       });
       return;
     }
+
+    if (/\s/g.test(req.body.username)) {
+      res.status(400).send({
+        message: "User ID can not have space!"
+      });
+      return;
+    }
+
     if (!req.body.email) {
       res.status(400).send({
         message: "Email can not be empty!"
