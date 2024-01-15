@@ -131,13 +131,12 @@ export default class UserController {
 
     async savePayout(req: Request, res: Response) {
         const body = {
-            wdrawid: req.body.wdrawid,
+            wdrawid: 'GOZISK' + req.body.wdrawid,
             status: parseInt(req.body.status),
             message: req.body.message,
             txid: req.body.txid,
             error: req.body.error
         }
-
         
         try {
             const wdDetail: IWithdraw = await walletRepository.getWithdrawTransaction(body.wdrawid);
@@ -150,7 +149,7 @@ export default class UserController {
                 const userWallet: Wallet = await walletRepository.retrieveById(wdDetail.user_id);
                 await walletRepository.updateWithdraw(wdDetail.id!, 'status', "'approved'");
                 await walletRepository.updateWithdraw(wdDetail.id!, 'txid', `'${body.txid}'`);
-                const fee = wdDetail.withdraw_amount * 0.05;
+                const fee = wdDetail.withdraw_amount * 0.03;
                 // save the transactioin
                 const transactionDetail: any = {
                     description: `${wdDetail.withdraw_amount}USDT Withdrawan to the address ${wdDetail.address}`,
@@ -165,6 +164,7 @@ export default class UserController {
                     approval: Approval.Approved,
                     currency: 'USDT',
                 };
+                
                 await transactionRepository.create(transactionDetail, true);
                 res.status(200).send({'success': 'Transaction saved successfully!'});
 
@@ -335,22 +335,23 @@ export default class UserController {
             
             if (selectedWithdrawal && selectedWithdrawal.status === 'pending') {
                 const userWallet: Wallet = await walletRepository.retrieveById(selectedWithdrawal.user_id);
-                const fee = selectedWithdrawal.withdraw_amount * 0.05;
+                const fee = selectedWithdrawal.withdraw_amount * 0.03;
 
                 if (userWallet && userWallet.net_wallet > fee) {
                     // prepare payment gateway call.
+                    const refId = selectedWithdrawal.reference.replace('GOZISK', '');
                     const config = {headers: {'Content-Type': 'multipart/form-data'}};
                     const hashed = crypto.createHash('sha256')
                         .update(
                             userWallet.username
-                            + selectedWithdrawal.reference
+                            + refId
                             + selectedWithdrawal.address
                             + selectedWithdrawal.withdraw_amount
                             + process.env.SECRETKEY).digest("hex");
 
                     const data: any = {
                         username: userWallet.username,
-                        wdrawid: selectedWithdrawal.reference,
+                        wdrawid: refId,
                         address: selectedWithdrawal.address,
                         amount: selectedWithdrawal.withdraw_amount,
                         hashed: hashed
