@@ -37,7 +37,7 @@ class WalletRepository implements IWalletRepository {
             connection.query<ICryptoTransaction[]>(
                 `SELECT ct.*, u.id user_id
                     FROM crypto_transaction ct 
-                        LEFT JOIN users u ON u.username = ct.username
+                        LEFT JOIN users u ON LOWER(u.username) = ct.username
                     WHERE txid = ?`,
                 [cryptoTxId],
                 (err, res) => {

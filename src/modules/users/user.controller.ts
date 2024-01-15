@@ -80,6 +80,7 @@ export default class UserController {
 
       const user: User = {
         ...req.body,
+        username: req.body.username.toLowerCase(),
         password_hash: hashPassword,
         refer_code: userRepository.makeReferCode(req.body.username),
         registerOTP: otp,
