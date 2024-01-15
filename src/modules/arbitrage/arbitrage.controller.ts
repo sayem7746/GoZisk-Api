@@ -123,11 +123,20 @@ export default class ArbitrageController {
 
     try {
       const allProfit = await arbitrageRepository.getArbitrageByDate(date);
+      let totalGoziskInvestment = await arbitrageRepository.getGoziskTotalInvestment(date);
       let totalInvestment = await arbitrageRepository.getTotalInvestment(date);
-      if (!totalInvestment) {
-        totalInvestment = await arbitrageRepository.getLastInvestment();
+      
+      if (!totalGoziskInvestment) {
+        totalGoziskInvestment = await arbitrageRepository.getLastInvestment();
       }
-      res.status(200).send({allProfit, totalInvestment});
+
+      res.status(200).send({
+        allProfit,
+        totalInvestment: {
+          ...totalGoziskInvestment,
+          gozisk_investment: totalGoziskInvestment.gozisk_investment + totalInvestment.total
+        }
+      });
     } catch (err) {
       res.status(500).send({
         message: "Some error occurred while retrieving arbitrage data."
