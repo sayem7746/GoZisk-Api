@@ -61,6 +61,20 @@ class WalletRepository implements IWalletRepository {
         });
     }
 
+    retrieveAllUserPair(): Promise<Wallet[]> {
+        return new Promise((resolve, reject) => {
+            connection.query<Wallet[]>(
+                `SELECT w.*, u.referrer_id, u.username, p.id as pairing_id  FROM wallet w
+                    LEFT JOIN users u on u.id = w.user_id
+                    LEFT JOIN pairing p on p.user_id = w.user_id`,
+                (err, res) => {
+                    if (err) reject(err);
+                    else resolve(res);
+                }
+            );
+        });
+    }
+
     getDepositAddress(userId: number): Promise<any> {
         return new Promise((resolve, reject) => {
             connection.query<any>(
@@ -159,6 +173,20 @@ class WalletRepository implements IWalletRepository {
                         this.retrieveById(userId)
                             .then((wallet) => resolve(wallet!))
                             .catch(reject);
+                }
+            );
+        });
+    }
+
+    createPairEntry(userId: number, amount: number): Promise<any> {
+        return new Promise((resolve, reject) => {
+            connection.query<any[]>(
+                `INSERT INTO pairing
+                (invest, user_id)
+                VALUES(${amount}, ${userId})`,
+                (err, res) => {
+                if (err) reject(err);
+                else resolve(res?.[0]);
                 }
             );
         });
@@ -349,9 +377,9 @@ class WalletRepository implements IWalletRepository {
         return new Promise((resolve, reject) => {
             connection.query<OkPacket>(
                 `UPDATE gozisk.pairing
-                    SET invest=0, carry_forward=?, modified_on=CURRENT_TIMESTAMP
+                    SET invest=0, carry_forward=?, invest = 0, modified_on=CURRENT_TIMESTAMP
                 WHERE user_id=?;`,
-                [userPairDetail.totalBellowInvest, userPairDetail.user_id],
+                [userPairDetail.totalBellowInvest + userPairDetail.personal_invest, userPairDetail.user_id],
                 (err, res) => {
                     if (err) reject(err);
                     else resolve(true);

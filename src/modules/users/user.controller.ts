@@ -124,6 +124,7 @@ export default class UserController {
         const token = await userRepository.tokenBuilder(validUser);
         let userWallet: Wallet = await walletRepository.retrieveById(validUser.id);
         if (!userWallet) {
+          await walletRepository.createPairEntry(validUser.id, 0);
           userWallet = await walletRepository.create(validUser.id);
         }
         res.status(200).send({ user: validUser, wallet: userWallet, token: token });

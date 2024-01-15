@@ -45,6 +45,22 @@ export default class UserController {
         }
     }
 
+    async fixPairing(req: Request, res: Response) {
+        try {
+            const allUsers = await walletRepository.retrieveAllUserPair();
+            res.status(200).send({allUsers});
+            allUsers.forEach(user => {
+                if(!user.pairing_id) {
+                    walletRepository.createPairEntry(user.user_id, 0);
+                }
+            });
+        } catch (err) {
+            res.status(500).send({
+                message: `Error retrieving data.`
+            });
+        }
+    }
+
     async currentValue(req: Request, res: Response) {
         const binance_ex = new binance();
 
