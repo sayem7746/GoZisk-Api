@@ -328,7 +328,7 @@ class WalletRepository implements IWalletRepository {
         let totalLegs: number = userPairLegs.length;
         let totalSponsorValue: number = 0;
         let remainCarryForward = 0;
-        // console.log(userPairLegs);
+        
         userPairLegs.forEach((leg: any, i: number) => {
             if ((i+1) !== totalLegs) {
                 totalPairValue += leg.totalBellowInvest;
@@ -377,9 +377,9 @@ class WalletRepository implements IWalletRepository {
         return new Promise((resolve, reject) => {
             connection.query<OkPacket>(
                 `UPDATE gozisk.pairing
-                    SET invest=0, carry_forward=?, invest = 0, modified_on=CURRENT_TIMESTAMP
+                    SET invest=0, carry_forward=?, modified_on=CURRENT_TIMESTAMP
                 WHERE user_id=?;`,
-                [userPairDetail.totalBellowInvest + userPairDetail.personal_invest, userPairDetail.user_id],
+                [userPairDetail.totalBellowInvest + userPairDetail.invest, userPairDetail.user_id],
                 (err, res) => {
                     if (err) reject(err);
                     else resolve(true);
