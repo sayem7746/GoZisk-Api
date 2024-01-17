@@ -379,7 +379,7 @@ class WalletRepository implements IWalletRepository {
                 `UPDATE gozisk.pairing
                     SET invest=0, carry_forward=?, modified_on=CURRENT_TIMESTAMP
                 WHERE user_id=?;`,
-                [userPairDetail.totalBellowInvest + userPairDetail.invest, userPairDetail.user_id],
+                [userPairDetail.totalBellowInvest, userPairDetail.user_id],
                 (err, res) => {
                     if (err) reject(err);
                     else resolve(true);
