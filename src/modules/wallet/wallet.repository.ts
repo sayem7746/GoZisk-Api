@@ -350,26 +350,26 @@ class WalletRepository implements IWalletRepository {
         profit = profit > 5000 ? 5000 : profit;
 
         const userWallet: Wallet = await this.retrieveById(user_id);
-        if (profit > 0 && userWallet.invest_wallet >= 10) {
-            const updatedUserWallet: Wallet = await this.addProfitById(profit, user_id);
+        // if (profit > 0 && userWallet.invest_wallet >= 10) {
+        //     const updatedUserWallet: Wallet = await this.addProfitById(profit, user_id);
 
-            const referenceNumber = userRepository.generateReferenceNumber();
-            const transactionDetail: any = {
-                description: `Pairing bonus ${profit}. Total paired legs ${userPairLegs.length}. Total paired value ${totalPairValue}`,
-                type: 'PairingBonus',
-                amount: profit,
-                balance: updatedUserWallet.net_wallet,
-                reference_number: referenceNumber,
-                user_id: user_id,
-                status: 'completed',
-                notes: 'Pairing Bonus',
-                transaction_fee: 0,
-                approval: Approval.Approved,
-                currency: 'USDT',
-            };
+        //     const referenceNumber = userRepository.generateReferenceNumber();
+        //     const transactionDetail: any = {
+        //         description: `Pairing bonus ${profit}. Total paired legs ${userPairLegs.length}. Total paired value ${totalPairValue}`,
+        //         type: 'PairingBonus',
+        //         amount: profit,
+        //         balance: updatedUserWallet.net_wallet,
+        //         reference_number: referenceNumber,
+        //         user_id: user_id,
+        //         status: 'completed',
+        //         notes: 'Pairing Bonus',
+        //         transaction_fee: 0,
+        //         approval: Approval.Approved,
+        //         currency: 'USDT',
+        //     };
 
-            await transactionRepository.create(transactionDetail, true);
-        }
+        //     await transactionRepository.create(transactionDetail, true);
+        // }
     }
 
     // UPDATE PAIR STATUS TO DATABASE.
