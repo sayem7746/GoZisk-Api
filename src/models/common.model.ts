@@ -17,3 +17,4 @@ export default interface ISettings extends RowDataPacket {
   value: string;
   modified_on?: string;
 }
+

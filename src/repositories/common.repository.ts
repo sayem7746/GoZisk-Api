@@ -6,11 +6,8 @@ dotenv.config();
 import IBanner from "../models/common.model";
 import ISettings from "../models/common.model";
 
-interface IBannerRepository {
-    retrieveByCategory(category: string): Promise<IBanner[]>;
-}
 
-class BannerRepository implements IBannerRepository {
+class CommonRepository {
     retrieveByCategory(category: string): Promise<IBanner[]> {
         return new Promise((resolve, reject) => {
             connection.query<IBanner[]>(
@@ -35,8 +32,6 @@ class BannerRepository implements IBannerRepository {
             );
         });
     }
-
-
 }
 
-export default new BannerRepository();
+export default new CommonRepository();

@@ -3,9 +3,12 @@ import MailService from "../services/mailService";
 import HttpError from '../utils/httpError';
 import { generateOtp } from "../utils";
 import verifyEmail from '../templates/verifyEmailTemplate';
+import supportEmail from '../templates/supportEmailTemplate';
 import IBanner from "../models/common.model";
 import ISettings from "../models/common.model";
+import ISupportEmail from "../models/common.model";
 import commonRepository from "../repositories/common.repository";
+import emailRepository from "../repositories/email.repository";
 
 export function welcome(req: Request, res: Response): Response {
   return res.json({ message: "Welcome to bezkoder application." });
@@ -52,6 +55,32 @@ export async function getSettings(req: Request, res: Response) {
   } catch (err) {
       res.status(500).send({
           message: `Error retrieving data.`
+      });
+  }
+}
+
+export async function sendSupportEmail(req: Request, res: Response) {
+  const reqData = req.body;
+  try {
+      const affectedRows: number = await emailRepository.saveSupportEmail(reqData);
+      if (affectedRows > 0) {
+        //SEND VERIFICATION MAIL TO USER
+        const emailTemplate = supportEmail(reqData.name, reqData.email, reqData.message);
+        const mailService = MailService.getInstance();
+        await mailService.sendMail(req.headers['X-Request-Id'] as string, {
+            to: `"GoZisk Support" support@gozisk.com`,
+            subject: 'GoZisk Support email',
+            html: emailTemplate.html,
+        });
+        res.status(200).send({success: 'Send to support successfully!'});
+      } else {
+        res.status(500).send({error: 'failed! Try again later.'});
+      }
+        
+      
+  } catch (err) {
+      res.status(500).send({
+          message: `Faild to record email.`
       });
   }
 }
