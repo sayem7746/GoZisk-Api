@@ -323,8 +323,7 @@ export default class UserController {
         const data: any = {...req.body, user_id: parseInt(req.params.id)};
         try {
             const userWallet: Wallet = await walletRepository.retrieveById(data.user_id);
-            const fee = data.withdraw_amount * 0.05;
-            if (userWallet && userWallet.net_wallet > (data.withdraw_amount + fee)) {
+            if (userWallet) {
                 const referenceNumber = userRepository.generateReferenceNumber();
                 const userWithdrawList: IWithdraw[] = await walletRepository.addWithdraw({...data, reference: referenceNumber});
                 if (userWithdrawList) {
@@ -351,9 +350,8 @@ export default class UserController {
             
             if (selectedWithdrawal && selectedWithdrawal.status === 'pending') {
                 const userWallet: Wallet = await walletRepository.retrieveById(selectedWithdrawal.user_id);
-                const fee = selectedWithdrawal.withdraw_amount * 0.03;
 
-                if (userWallet && userWallet.net_wallet > fee) {
+                if (userWallet) {
                     // prepare payment gateway call.
                     const refId = selectedWithdrawal.reference.replace('GOZISK', '');
                     const config = {headers: {'Content-Type': 'multipart/form-data'}};
@@ -375,7 +373,6 @@ export default class UserController {
 
                     const payoutStatus = await axios.post<any>(`https://payment.gozisk.com/payout.php`, data, config);
                     if (payoutStatus.data.status === 'ok') {
-                        await walletRepository.updateByColumn('net_wallet', userWallet.net_wallet - fee, selectedWithdrawal.user_id);
                         await walletRepository.updateWithdraw(selectedWithdrawal.id!, 'payoutid', payoutStatus.data.payoutid);
                         const latestWithdrawList: IWithdraw[] = await walletRepository.retrieveWithdrawal();
                         res.status(200).send({latestWithdrawList, payoutStatus: payoutStatus.data});
