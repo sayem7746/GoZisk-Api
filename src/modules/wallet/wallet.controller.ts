@@ -168,7 +168,7 @@ export default class UserController {
                 const fee = wdDetail.withdraw_amount * 0.03;
                 // save the transactioin
                 const transactionDetail: any = {
-                    description: `${wdDetail.withdraw_amount}USDT Withdrawan to the address ${wdDetail.address}`,
+                    description: `${wdDetail.withdraw_amount}USDT Withdrawn to the address ${wdDetail.address}`,
                     type: 'withdraw',
                     amount: wdDetail.withdraw_amount,
                     balance: userWallet.net_wallet - fee,
