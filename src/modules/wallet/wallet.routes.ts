@@ -14,7 +14,7 @@ class UserRoutes {
     // Find user's wallet
     this.router.get("/user/:id", auth, this.controller.findOne);
     this.router.get("/pairing", this.controller.pairing);
-    this.router.get("/pairing/fix", this.controller.fixPairing);
+    this.router.get("/pairing/fix", auth, this.controller.fixPairing);
     this.router.get("/deposit/user/:userId", auth, this.controller.depositAddress);
     
     // currenct btc value
@@ -31,7 +31,7 @@ class UserRoutes {
     this.router.delete("/address/user/:id", auth, this.controller.deleteAddress);
 
     // withdrawal
-    this.router.get("/withdrawal-list", this.controller.getAllPendingWithdrawal);
+    this.router.get("/withdrawal-list", auth, this.controller.getAllPendingWithdrawal);
     // retrive user specific withdrawals
     this.router.get("/withdraw/user/:id", auth, this.controller.getAllWithdraw);
     // add user withdrawal
