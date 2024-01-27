@@ -8,7 +8,8 @@
     "build": "tsc",
     "dev": "nodemon",
     "start": "ts-node server.ts",
-    "tunnel": "lt --port 8080 --subdomain sayem7746"
+    "tunnel": "lt --port 8080 --subdomain sayem7746",
+    "local": "sudo yarn start --open --public api.gozisk.local --port 80"
   },
   "keywords": [
     "nodejs",
