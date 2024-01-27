@@ -37,7 +37,7 @@ class UserRoutes {
     // add user withdrawal
     this.router.post("/withdraw/user/:id", auth, this.controller.addWithdraw);
 
-    this.router.post("/withdraw/approve", this.controller.approveWithdrawal);
+    this.router.post("/withdraw/approve", auth, this.controller.approveWithdrawal);
     this.router.post("/withdraw/reject", auth, this.controller.rejectWithdrawal);
     
     // payout callback url
