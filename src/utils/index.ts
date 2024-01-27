@@ -10,7 +10,7 @@ const generateJWT = function (
 ): string {
     const privateKey: any = process.env.JWT_SECRETS;
     const defaultOptions: object = {
-        expiresIn: '2 days',
+        expiresIn: '2m',
     };
 
     return jwt.sign(
