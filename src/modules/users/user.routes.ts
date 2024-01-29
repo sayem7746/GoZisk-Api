@@ -25,10 +25,10 @@ class UserRoutes {
     this.router.put("/:id", auth,this.controller.update);
 
     // Delete a User with id
-    this.router.delete("/:id", auth,this.controller.delete);
+    // this.router.delete("/:id", auth,this.controller.delete);
 
     // Delete all Users
-    this.router.delete("/", auth, this.controller.deleteAll);
+    // this.router.delete("/", auth, this.controller.deleteAll);
 
     // Delete a User with id
     this.router.get("/hierarchy/:id", auth, this.controller.getHierarchy);
