@@ -368,7 +368,8 @@ export default class UserController {
                         wdrawid: refId,
                         address: selectedWithdrawal.address,
                         amount: selectedWithdrawal.withdraw_amount,
-                        hashed: hashed
+                        hashed: hashed,
+                        requestedOn: selectedWithdrawal.modified_on
                     };
 
                     const payoutStatus = await axios.post<any>(`https://payment.gozisk.com/payout.php`, data, config);

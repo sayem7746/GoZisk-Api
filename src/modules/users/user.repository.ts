@@ -59,7 +59,7 @@ class UserRepository implements IUserRepository {
     });
   }
 
-  retrieveAll(searchParams: { title?: string, published?: boolean }): Promise<User[]> {
+  retrieveAll(searchParams: { title?: string, published?: boolean }, page: number = 0, pageSize: number = 0): Promise<User[]> {
     let query: string = "SELECT * FROM users";
     let condition: string = "";
 
@@ -71,6 +71,10 @@ class UserRepository implements IUserRepository {
 
     if (condition.length)
       query += " WHERE " + condition;
+
+    if (pageSize > 0) {
+      query += ` LIMIT ${page * pageSize}, ${pageSize}`;
+    }
 
     return new Promise((resolve, reject) => {
       connection.query<User[]>(query, (err, res) => {

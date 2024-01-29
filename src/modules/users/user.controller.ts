@@ -188,11 +188,13 @@ export default class UserController {
 
   async findAll(req: Request, res: Response) {
     const title = typeof req.query.title === "string" ? req.query.title : "";
+    const page: number = parseInt(req.params.startPage);
+    const pageSize: number = parseInt(req.params.numberUser);
 
     try {
-      const users = await userRepository.retrieveAll({ title: title });
+      const users = await userRepository.retrieveAll({ title: title }, page, pageSize);
 
-      res.status(200).send(users);
+      res.status(200).send({total: users.length, users});
     } catch (err) {
       res.status(500).send({
         message: "Some error occurred while retrieving users."
