@@ -49,7 +49,7 @@ class UserRepository implements IUserRepository {
   verifyLogin(userLogin: Partial<User>): Promise<User> {
     return new Promise((resolve, reject) => {
       connection.query<User[]>(
-        "SELECT id, email, username, password_hash, full_name, phone, wallet_addr, refer_code, active  FROM users WHERE email = ?",
+        "SELECT id, email, username, role_id, password_hash, full_name, phone, wallet_addr, refer_code, active  FROM users WHERE email = ?",
         [userLogin.email],
         (err, res) => {
           if (err) reject(err);
@@ -282,7 +282,7 @@ class UserRepository implements IUserRepository {
       const accessToken = generateJWT(
         {
           id: user.id,
-          role: user.role_id === 1 ? 'user' : 'admin',
+          role: user.role_id === null ? 'user' : user.role_id,
           tokenType: 'access',
         },
         {

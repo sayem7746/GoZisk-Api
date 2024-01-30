@@ -106,12 +106,19 @@ export default class UserController {
   }
 
   async login(req: Request, res: Response) {
+    const isAdmin: boolean = req.params.isAdmin === 'admin';
+
     try {
       const userData: IUserLogin = req.body;
       const validUser: User = await userRepository.verifyLogin(userData);
       const isValidPass = await compare(userData.password, validUser.password_hash);
+      
       //CHECK FOR USER VERIFIED AND EXISTING
-      if (validUser.active === 0) {
+      if (isAdmin && validUser.role_id === null) {
+        res.status(400).send({
+          message: 'You have entered an invalid email address or password!'
+        });
+      } else if (validUser.active === 0) {
         res.status(400).send({
           message: 'Please confirm your account by OTP and try again!'
         });
