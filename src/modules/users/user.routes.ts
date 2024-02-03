@@ -21,6 +21,7 @@ class UserRoutes {
 
     // Retrieve a single User with id
     this.router.get("/:id", auth,this.controller.findOne);
+    this.router.get("/detail/:id", auth,this.controller.findUserDetail);
 
     // Update a User with id
     this.router.put("/:id", auth,this.controller.update);

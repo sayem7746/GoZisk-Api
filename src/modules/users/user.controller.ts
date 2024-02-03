@@ -227,6 +227,32 @@ export default class UserController {
     }
   }
 
+  async findUserDetail(req: Request, res: Response) {
+    const id: number = parseInt(req.params.id);
+
+    try {
+      const user = await userRepository.retrieveById(id);
+
+      if (user){
+        const userDetail = {
+          full_name: user.full_name,
+          email: user.email,
+          phone: user.phone,
+          country: user.country,
+          refer_code: user.refer_code
+        }
+        res.status(200).send(userDetail);
+      } else
+        res.status(404).send({
+          message: `Cannot find User with id=${id}.`
+        });
+    } catch (err) {
+      res.status(500).send({
+        message: `Error retrieving User with id 1=${id}.`
+      });
+    }
+  }
+
   async update(req: Request, res: Response) {
     let user: User = req.body;
     user.id = parseInt(req.params.id);
