@@ -59,6 +59,65 @@ class UserRepository implements IUserRepository {
     });
   }
 
+  generateOtp(email: string, otp: number, otpExpiration: string): Promise<any> {
+    return new Promise((resolve, reject) => {
+      connection.query<OkPacket>(
+        "INSERT INTO otp (email, code, expire_on) VALUES(?,?,?)",
+        [
+          email,
+          otp,
+          otpExpiration
+        ],
+        (err, res) => {
+          if (err) reject(err.message);
+          else
+            this.otpById(res.insertId)
+              .then((otp) => resolve(otp!))
+              .catch(reject);
+        }
+      );
+    });
+  }
+
+  getExistingOtp(email: string): Promise<any> {
+    return new Promise((resolve, reject) => {
+      connection.query<OkPacket>(
+        `SELECT * FROM otp WHERE email = '${email}' 
+        ORDER BY id DESC
+        LIMIT 0,1`,
+        (err, res) => {
+          if (err) reject(err.message);
+          else resolve(res);
+        }
+      );
+    });
+  }
+
+  verifyOtp(email: string, otp: number): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      connection.query<OkPacket>(
+        `SELECT * FROM otp WHERE email = '${email}'AND code = ${otp}`,
+        (err, res) => {
+          let currentTime: any = new Date();
+          const existingOtp: any = res;
+          console.log(err, existingOtp);
+          if (err) reject(err.message);
+          else {
+            if (existingOtp.length > 0) {
+              resolve(this.getTimeDifference(currentTime, existingOtp[0].expire_on) > 0);
+            } else {
+              resolve(false);
+            }
+          }
+        }
+      );
+    });;
+  }
+
+  getTimeDifference(time1: number, time2: number): number {
+    return Math.floor((time2 - time1) / (1000 * 60));
+  }
+
   retrieveAll(searchParams: { title?: string, published?: boolean }, page: number = 0, pageSize: number = 0): Promise<User[]> {
     let query: string = "SELECT * FROM users";
     let condition: string = "";
@@ -89,6 +148,19 @@ class UserRepository implements IUserRepository {
       connection.query<User[]>(
         "SELECT * FROM users WHERE id = ?",
         [userId],
+        (err, res) => {
+          if (err) reject(err);
+          else resolve(res?.[0]);
+        }
+      );
+    });
+  }
+
+  otpById(id: number): Promise<any> {
+    return new Promise((resolve, reject) => {
+      connection.query<any[]>(
+        "SELECT * FROM otp WHERE id = ?",
+        [id],
         (err, res) => {
           if (err) reject(err);
           else resolve(res?.[0]);

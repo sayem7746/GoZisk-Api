@@ -228,21 +228,29 @@ export default class UserController {
             network_name: req.body.network_name,
             network_type: req.body.network_type,
             status: req.body.status,
-            note: req.body.note
+            note: req.body.note,
+            otp: req.body.otp
         }
+        const email: string = req.body.token.sub;
 
         try {
+            const verifyOtp: boolean = await userRepository.verifyOtp(email, addressDetail.otp);
+            
             const getAddress: IWalletAddress[] = await walletRepository.retrieveByAddress(addressDetail.user_id, addressDetail.address);
             if (getAddress.length !== 0) {
                 res.status(500).send({ 'error': 'Address exists!' });
                 return;
             }
-            const addresses: IWalletAddress[] = await walletRepository.addAddress(addressDetail);
-            
-            if (!addresses) {
-                res.status(200).send({ 'error': 'Failed to add address!' });
+            if (verifyOtp) {
+                const addresses: IWalletAddress[] = await walletRepository.addAddress(addressDetail);
+
+                if (!addresses) {
+                    res.status(200).send({ 'error': 'Failed to add address!' });
+                } else {
+                    res.status(200).send(addresses);
+                }
             } else {
-                res.status(200).send(addresses);
+                res.status(200).send({ 'error': 'OTP does not matched!' });
             }
             
         } catch (err) {

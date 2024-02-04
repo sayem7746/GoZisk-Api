@@ -10,6 +10,7 @@ import { Approval }from "../../models/transaction.model";
 import transactionRepository from "../../repositories/transaction.repository";
 import { generateOtp } from "../../utils";
 import verifyEmail from '../../templates/verifyEmailTemplate';
+import otpEmail from '../../templates/otpEmailTemplate';
 import resetPassword from '../../templates/resetPasswordTemplate';
 import MailService from "../../services/mailService";
 import moment from "moment";
@@ -185,6 +186,47 @@ export default class UserController {
         res.status(200).send({ result: true, message: 'Please check email for new OTP!' });
       } else {
         res.status(200).send({ result: false, message: 'Email not exists!' });
+      }
+    } catch (err) {
+      res.status(500).send({
+        message: "Email not exists!."
+      });
+    }
+  }
+
+  async otp(req: Request, res: Response) {
+    const email: string = req.body.token.sub;
+
+    try {
+      //GENERATE OTP general VERIFICATION
+      let currentTime: any = new Date();
+      const existingOtp: any = await userRepository.getExistingOtp(email);
+      const minDiff: number = userRepository.getTimeDifference(currentTime, existingOtp[0].expire_on);
+      
+      if (minDiff < 0) {
+        let tokenExpiration: any = new Date();
+        tokenExpiration = tokenExpiration.setMinutes(
+          tokenExpiration.getMinutes() + 10
+        );
+
+        const otp: number = parseInt(generateOtp(6));
+        const otpExpiration: any = moment(new Date(tokenExpiration)).format('YYYY-MM-DD HH:mm:ss');
+        const validUser: User = await userRepository.retrieveByEmail(email);
+        const savedOtp: any = await userRepository.generateOtp(email, otp, otpExpiration);
+        if (savedOtp) {
+          const emailTemplate = otpEmail(savedOtp.code.toString());
+          const mailService = MailService.getInstance();
+          await mailService.sendMail(req.headers['X-Request-Id'] as string, {
+            to: `"${validUser.full_name}" ${validUser.email}`,
+            subject: 'GoZisk OTP verification',
+            html: emailTemplate.html,
+          });
+          res.status(200).send({ result: true, message: 'Please check email for new OTP!' });
+        } else {
+          res.status(200).send({ result: false, message: 'Email not exists!' });
+        }
+      } else {
+        res.status(200).send({ result: false, message: 'Please check email for OTP!' });
       }
     } catch (err) {
       res.status(500).send({

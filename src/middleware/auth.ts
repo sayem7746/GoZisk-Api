@@ -15,7 +15,7 @@ export const auth = async (req: Request, res: Response, next: NextFunction) => {
         }
 
         const decoded = validateToken(token);
-        (req as CustomRequest).token = decoded;
+        (req as CustomRequest).body = {...req.body, token: decoded};
 
         next();
     } catch (err) {

@@ -54,6 +54,8 @@ class UserRoutes {
     this.router.post("/verify", this.controller.emailVerify);
     this.router.post("/genotp", this.controller.generateOtp);
 
+    this.router.post('/otp', auth, this.controller.otp);
+
     // User login
     this.router.post("/login", this.controller.login);
     this.router.post("/login/:isAdmin", this.controller.login);
