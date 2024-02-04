@@ -249,7 +249,7 @@ export default class UserController {
         if (minDiff < 0) {
           let tokenExpiration: any = new Date();
           tokenExpiration = tokenExpiration.setMinutes(
-            tokenExpiration.getMinutes() + 10
+            tokenExpiration.getMinutes() + 5
           );
 
           const otp: number = parseInt(generateOtp(6));
