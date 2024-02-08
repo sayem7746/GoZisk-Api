@@ -28,7 +28,7 @@ export default class UserController {
   async create(req: Request, res: Response) {
     if (!req.body.full_name) {
       res.status(400).send({
-        message: req.body //"Name can not be empty!"
+        message: req.body
       });
       return;
     }
@@ -50,6 +50,13 @@ export default class UserController {
     if (!req.body.email) {
       res.status(400).send({
         message: "Email can not be empty!"
+      });
+      return;
+    }
+
+    if (!req.body.country) {
+      res.status(400).send({
+        message: "Country can not be empty!"
       });
       return;
     }

@@ -22,7 +22,7 @@ class UserRepository implements IUserRepository {
   save(user: User): Promise<User> {
     return new Promise((resolve, reject) => {
       connection.query<OkPacket>(
-        "INSERT INTO users (full_name, username, email, phone, password_hash, refer_code, referrer_id, active, registerOTP, otpExpiration) VALUES(?,?,?,?,?,?,?,?,?,?)",
+        "INSERT INTO users (full_name, username, email, phone, password_hash, refer_code, referrer_id, active, registerOTP, otpExpiration, country) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
         [
           user.full_name,
           user.username,
@@ -33,7 +33,8 @@ class UserRepository implements IUserRepository {
           user.referrer_id,
           0,
           user.registerOTP,
-          user.otpExpiration
+          user.otpExpiration,
+          user.country
         ],
         (err, res) => {
           if (err) reject(err.message);
