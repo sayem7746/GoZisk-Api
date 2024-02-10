@@ -50,7 +50,7 @@ class UserRepository implements IUserRepository {
   verifyLogin(userLogin: Partial<User>): Promise<User> {
     return new Promise((resolve, reject) => {
       connection.query<User[]>(
-        "SELECT id, email, username, role_id, password_hash, full_name, phone, wallet_addr, refer_code, active  FROM users WHERE email = ?",
+        "SELECT id, email, username, role_id, password_hash, full_name, country, phone, wallet_addr, refer_code, active  FROM users WHERE email = ?",
         [userLogin.email],
         (err, res) => {
           if (err) reject(err);
