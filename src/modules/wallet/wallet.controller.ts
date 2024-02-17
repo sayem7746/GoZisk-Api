@@ -480,4 +480,40 @@ export default class UserController {
             });
         }
     }
+
+    async getAllWallet(req: Request, res: Response) {
+        const viewName: string = req.params.view;
+        try {
+            const walletList: any[] = await walletRepository.retrieveAllWallet(viewName);
+            if (walletList) {
+                res.status(200).send(walletList);
+            } else {
+                res.status(200).send({ 'error': 'Failed to get list!' });
+            }
+            
+        } catch (err) {
+            res.status(500).send({
+                message: `Error retrieving data.`
+            });
+        }
+    }
+
+    async getWalletByParams(req: Request, res: Response) {
+        const paramname = req.params.paramname;
+        const paramvalue = req.params.paramvalue;
+
+        try {
+            const walletList: any[] = await walletRepository.retrieveWalletByParams(paramname, paramvalue);
+            if (walletList) {
+                res.status(200).send(walletList);
+            } else {
+                res.status(200).send({ 'error': 'Failed to get list!' });
+            }
+            
+        } catch (err) {
+            res.status(500).send({
+                message: `Error retrieving data.`
+            });
+        }
+    }
 }

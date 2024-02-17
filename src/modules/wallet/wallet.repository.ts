@@ -609,8 +609,7 @@ class WalletRepository implements IWalletRepository {
             );
         });
     }
-
-
+    
     updateWithdraw(id: number, column_fields: string, column_value: number | string): Promise<number> {
         return new Promise((resolve, reject) => {
             connection.query<OkPacket>(
@@ -625,6 +624,31 @@ class WalletRepository implements IWalletRepository {
         });
     }
 
+    // report all user wallet
+    retrieveAllWallet(view: string): Promise<any[]> {
+        return new Promise((resolve, reject) => {
+            connection.query<any[]>(
+                `SELECT * FROM ${view}`,
+                (err, res) => {
+                    if (err) reject(err);
+                    else resolve(res);
+                }
+            );
+        });
+    }
+
+    retrieveWalletByParams(paramname: string, paramvalue: string): Promise<any[]> {
+        return new Promise((resolve, reject) => {
+            connection.query<any[]>(
+                `SELECT * FROM view_user_wallet 
+                    WHERE ${paramname} = '${paramvalue}'`,
+                (err, res) => {
+                    if (err) reject(err);
+                    else resolve(res);
+                }
+            );
+        });
+    }
 }
 
 export default new WalletRepository();

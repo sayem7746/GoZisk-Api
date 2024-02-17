@@ -34,6 +34,7 @@ class UserRoutes {
     this.router.get("/withdrawal-list", auth, this.controller.getAllPendingWithdrawal);
     // retrive user specific withdrawals
     this.router.get("/withdraw/user/:id", auth, this.controller.getAllWithdraw);
+    
     // add user withdrawal
     this.router.post("/withdraw/user/:id", auth, this.controller.addWithdraw);
 
@@ -42,6 +43,10 @@ class UserRoutes {
     
     // payout callback url
     this.router.post("/payout", this.controller.savePayout);
+
+    // report
+    this.router.get("/report/:view/all", auth, this.controller.getAllWallet);
+    this.router.get("/report/paramname/:paramname/paramvalue/:paramvalue", auth, this.controller.getWalletByParams);
   }
 }
 
