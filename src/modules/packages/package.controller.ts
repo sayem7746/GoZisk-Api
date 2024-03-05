@@ -69,7 +69,11 @@ export default class PackageController {
     
     try {
       let userWallet: Wallet = await walletRepository.retrieveById(purchaseData.user_id as number);
-      if (userWallet.net_wallet >= purchaseData.invest_amount) {
+      if (purchaseData.invest_amount < 100) {
+        res.status(404).send({
+          message: `Minimum package value $100.`
+        });
+      }else if (userWallet.net_wallet >= purchaseData.invest_amount) {
         const investDetail: IPurchasePackage = await packageRepository.purchasePackage(purchaseData);
         userWallet = await packageRepository.updateUserWallet(userWallet, purchaseData.invest_amount);
         let pairTableEntry: any = await packageRepository.getPairingRowData(purchaseData.user_id);
