@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import arbitrageRepository from "./arbitrage.repository";
 import walletRepository from "../wallet/wallet.repository";
-import {binance, kucoin, huobi, bybit} from 'ccxt';
+import {binance, kucoin, huobi, bybit, coinbase} from 'ccxt';
 import UserArbitrage, { IArbitrageProfit } from "./arbitrage.model";
 import Wallet from "../wallet/wallet.model";
 import Arbitrage from "./arbitrage.model";
@@ -74,12 +74,14 @@ export default class ArbitrageController {
     const kuCoin_ex = new kucoin();
     const houbi_ex = new huobi();
     const bybit_ex = new bybit();
+    const coinbase_ex = new coinbase();
     
     try {
       const binanceBtcValue = await (await binance_ex.fetchTicker('BTC/USDT')).close as number;
       const kuCoinBtcValue = await (await kuCoin_ex.fetchTicker('BTC/USDT')).close as number;
       const houbiBtcValue = await (await houbi_ex.fetchTicker('BTC/USDT')).close as number;
       const bybitBtcValue = await (await bybit_ex.fetchTicker('BTC/USDT')).close as number;
+      const coinbaseBtcValue = await (await bybit_ex.fetchTicker('BTC/USDT')).close as number;
       const latestMatch = await arbitrageRepository.getLastMatch();
 
       res.status(200).send({
@@ -87,6 +89,7 @@ export default class ArbitrageController {
         kuCoinBtcValue,
         houbiBtcValue,
         bybitBtcValue,
+        coinbaseBtcValue,
         latestMatch: latestMatch ? latestMatch : {}
       });
     } catch (err) {
