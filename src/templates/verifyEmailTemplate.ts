@@ -1,4 +1,4 @@
-const verifyEmail = function (otp: string, firstname: string) {
+const verifyEmail = function (otp: string, firstname: string, email: string) {
     const html = `
     <!DOCTYPE html>
     <html lang="en" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -130,6 +130,11 @@ const verifyEmail = function (otp: string, firstname: string) {
                               </td>
                             </tr>
                           </table>
+                          <p style="margin: 0 0 16px;">
+                            If you are having difficulties with OTP verification, then please click the link bellow.
+                            <a href="https://app.gozisk.com/verify?email=${email}&otp=${otp}" class="hover-underline"
+                              style="--text-opacity: 1; color: #7367f0;  text-decoration: none;">verify email</a>.
+                          </p>
                           <p style="margin: 0 0 16px;">
                             If you didn't initiate this request, please contact our support team immediately.
                             <a href="mailto:support@gozisk.com" class="hover-underline"

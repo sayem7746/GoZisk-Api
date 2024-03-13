@@ -98,7 +98,7 @@ export default class UserController {
       const savedUser = await userRepository.save(user);
 
       //SEND VERIFICATION MAIL TO USER
-      const emailTemplate = verifyEmail(otp, req.body.full_name);
+      const emailTemplate = verifyEmail(otp, req.body.full_name, req.body.email);
       const mailService = MailService.getInstance();
       await mailService.sendMail(req.headers['X-Request-Id'] as string, {
           to: `"${req.body.full_name}" ${req.body.email}`,
