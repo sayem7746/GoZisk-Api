@@ -183,7 +183,7 @@ export default class UserController {
       const validUser: User = await userRepository.updateOtpByEmail(email, registerOTP, otpExpiration);
       
       if (validUser) {
-        const emailTemplate = verifyEmail(registerOTP.toString(), validUser.full_name);
+        const emailTemplate = verifyEmail(registerOTP.toString(), validUser.full_name, req.body.email);
         const mailService = MailService.getInstance();
         await mailService.sendMail(req.headers['X-Request-Id'] as string, {
           to: `"${req.body.full_name}" ${req.body.email}`,

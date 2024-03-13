@@ -19,7 +19,8 @@ export async function email(req: Request, res: Response): Promise<Response> {
   const otp: string = generateOtp(6);
   const emailTemplate = verifyEmail(
     otp,
-    'Sayem'
+    'Sayem',
+    'sam@gmail.com'
   );
   const mailService = MailService.getInstance();
   await mailService.sendMail(req.headers['X-Request-Id'] as string, {
