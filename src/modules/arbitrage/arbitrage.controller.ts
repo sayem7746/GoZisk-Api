@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import arbitrageRepository from "./arbitrage.repository";
 import walletRepository from "../wallet/wallet.repository";
-import {binance, kucoin, huobi, bybit, coinbase, bingx, bitbank, bitfinex, gateio, probit} from 'ccxt';
+import { binance, kucoin, huobi, bybit, coinex, bingx, bitfinex, gateio, probit, bitmart } from 'ccxt';
 import UserArbitrage, { IArbitrageProfit } from "./arbitrage.model";
 import Wallet from "../wallet/wallet.model";
 import Arbitrage from "./arbitrage.model";
@@ -74,24 +74,24 @@ export default class ArbitrageController {
     const kuCoin_ex = new kucoin();
     const houbi_ex = new huobi();
     const bybit_ex = new bybit();
-    // const coinbase_ex = new coinbase();
-    // const bingx_ex = new coinbase();
-    // const bitbank_ex = new coinbase();
-    // const bitfinex_ex = new coinbase();
-    // const gateio_ex = new coinbase();
-    // const probit_ex = new coinbase();
+    const coinex_ex = new coinex();
+    const bingx_ex = new bingx();
+    const bitfinex_ex = new bitfinex();
+    const gateio_ex = new gateio();
+    const probit_ex = new probit();
+    const bitmart_ex = new bitmart();
     
     try {
       const binanceBtcValue = await (await binance_ex.fetchTicker('BTC/USDT')).close as number;
       const kuCoinBtcValue = await (await kuCoin_ex.fetchTicker('BTC/USDT')).close as number;
       const houbiBtcValue = await (await houbi_ex.fetchTicker('BTC/USDT')).close as number;
       const bybitBtcValue = await (await bybit_ex.fetchTicker('BTC/USDT')).close as number;
-      // const coinbaseBtcValue = await (await coinbase_ex.fetchTicker('BTC/USDT')).close as number;
-      // const bingxBtcValue = await (await bingx_ex.fetchTicker('BTC/USDT')).close as number;
-      // const bitbankBtcValue = await (await bitbank_ex.fetchTicker('BTC/USDT')).close as number;
-      // const bitfinexBtcValue = await (await bitfinex_ex.fetchTicker('BTC/USDT')).close as number;
-      // const gateioBtcValue = await (await gateio_ex.fetchTicker('BTC/USDT')).close as number;
-      // const probitBtcValue = await (await probit_ex.fetchTicker('BTC/USDT')).close as number;
+      const coinexBtcValue = await (await coinex_ex.fetchTicker('BTC/USDT')).close as number;
+      const bingxBtcValue = await (await bingx_ex.fetchTicker('BTC/USDT')).close as number;
+      const bitfinexBtcValue = await (await bitfinex_ex.fetchTicker('BTC/USDT')).close as number;
+      const gateioBtcValue = await (await gateio_ex.fetchTicker('BTC/USDT')).close as number;
+      const probitBtcValue = await (await probit_ex.fetchTicker('BTC/USDT')).close as number;
+      const bitmartBtcValue = await (await bitmart_ex.fetchTicker('BTC/USDT')).close as number;
       const latestMatch = await arbitrageRepository.getLastMatch();
 
       res.status(200).send({
@@ -99,12 +99,12 @@ export default class ArbitrageController {
         kuCoinBtcValue,
         houbiBtcValue,
         bybitBtcValue,
-        // coinbaseBtcValue,
-        // bingxBtcValue,
-        // bitbankBtcValue,
-        // bitfinexBtcValue,
-        // gateioBtcValue,
-        // probitBtcValue,
+        coinexBtcValue,
+        bingxBtcValue,
+        bitfinexBtcValue,
+        gateioBtcValue,
+        probitBtcValue,
+        bitmartBtcValue,
         latestMatch: latestMatch ? latestMatch : {}
       });
     } catch (err) {
