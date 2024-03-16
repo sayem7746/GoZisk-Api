@@ -59,6 +59,12 @@ export default class ArbitrageController {
     const data = req.body;
 
     try {
+      let max = 50000;
+      let min = 100;
+      let randomNumber = Math.floor(Math.random() * (max - min + 1) + min)
+      let previousTotalInvestment = await arbitrageRepository.getLastInvestment();
+      let latestInvestment = previousTotalInvestment.gozisk_investment + randomNumber;
+      await arbitrageRepository.updateLatestInvestment(latestInvestment);
       const savedArbitrage = await arbitrageRepository.save(data);
 
       res.status(201).send(savedArbitrage);
@@ -68,6 +74,7 @@ export default class ArbitrageController {
       });
     }
   }
+
   
   async exchanges(req: Request, res: Response) {
     const binance_ex = new binance();

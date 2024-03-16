@@ -102,7 +102,7 @@ class ArbitrageRepository implements IArbitrageRepository {
     });
   }
 
-  getLastInvestment(): Promise<Arbitrage> {
+  getLastInvestment(): Promise<any> {
     return new Promise((resolve, reject) => {
       connection.query<any>(
         `SELECT * FROM arbitrage_setting
@@ -110,6 +110,21 @@ class ArbitrageRepository implements IArbitrageRepository {
         (err, res) => {
           if (err) reject(err);
           else resolve(res[0]);
+        }
+      );
+    });
+  }
+
+  updateLatestInvestment(latestInvestment: number): Promise<any> {
+    return new Promise((resolve, reject) => {
+      connection.query<OkPacket>(
+        `INSERT INTO arbitrage_setting
+          (gozisk_investment)
+          VALUES(${latestInvestment})`,
+        (err, res) => {
+          if (err) reject(err);
+          else
+            resolve(true)
         }
       );
     });
