@@ -103,16 +103,48 @@ export default class ArbitrageController {
       const latestMatch = await arbitrageRepository.getLastMatch();
 
       res.status(200).send({
-        binanceBtcValue,
-        kuCoinBtcValue,
-        houbiBtcValue,
-        bybitBtcValue,
-        coinexBtcValue,
-        bingxBtcValue,
-        bitfinexBtcValue,
-        gateioBtcValue,
-        probitBtcValue,
-        bitmartBtcValue,
+        exchanges: [
+          {
+            name: 'Binance',
+            value: binanceBtcValue
+          },
+          {
+            name: 'KuCoin',
+            value: kuCoinBtcValue
+          },
+          {
+            name: 'Houbi',
+            value: houbiBtcValue
+          },
+          {
+            name: 'ByBit',
+            value: bybitBtcValue
+          },
+          {
+            name: 'CoinEx',
+            value: coinexBtcValue
+          },
+          {
+            name: 'BingX',
+            value: bingxBtcValue
+          },
+          {
+            name: 'BitFinex',
+            value: bitfinexBtcValue
+          },
+          {
+            name: 'GateIO',
+            value: gateioBtcValue
+          },
+          {
+            name: 'ProBit',
+            value: probitBtcValue
+          },
+          {
+            name: 'BitMart',
+            value: bitmartBtcValue
+          },
+        ],
         latestMatch: latestMatch ? latestMatch : {}
       });
     } catch (err) {
