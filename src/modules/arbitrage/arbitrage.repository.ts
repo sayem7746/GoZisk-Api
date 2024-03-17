@@ -81,7 +81,8 @@ class ArbitrageRepository implements IArbitrageRepository {
     return new Promise((resolve, reject) => {
       connection.query<any>(
         `SELECT * FROM arbitrage_setting
-            WHERE  investment_date BETWEEN '${date} 00:00:00' AND '${date} 23:59:00'`,
+            WHERE investment_date BETWEEN '${date} 00:00:00' AND '${date} 23:59:00'
+            ORDER BY id DESC`,
         (err, res) => {
           if (err) reject(err);
           else resolve(res[0]);
