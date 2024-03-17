@@ -161,7 +161,8 @@ export default class ArbitrageController {
         totalInvestment: {
           ...totalGoziskInvestment,
           gozisk_investment: totalGoziskInvestment.gozisk_investment + totalInvestment.total
-        }
+        },
+        totalCompanyInvestment: totalGoziskInvestment.gozisk_investment
       });
     } catch (err) {
       res.status(500).send({
