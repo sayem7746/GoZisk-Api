@@ -22,7 +22,7 @@ class ArbitrageRoutes {
     this.router.get("/bids/date/:date", auth, this.controller.arbitrageBidsByDate);
     this.router.get("/bids", auth, this.controller.arbitrageBidsByDate);
     this.router.post("/create", this.controller.create);
-    this.router.post("/adjust", this.controller.adjustInvestment);
+    this.router.get("/adjust", this.controller.adjustInvestment);
     this.router.post("/onesignal/user/:userId", auth, this.controller.notify);
   }
 }
