@@ -59,17 +59,36 @@ export default class ArbitrageController {
     const data = req.body;
 
     try {
-      let max = 500;
-      let min = 100;
-      let randomNumber = Math.floor(Math.random() * (max - min + 1) + min)
       let previousTotalInvestment = await arbitrageRepository.getLastInvestment();
       let latestInvestment = previousTotalInvestment.gozisk_investment;
-      // let latestInvestment = previousTotalInvestment.gozisk_investment + randomNumber;
-      await arbitrageRepository.updateLatestInvestment(latestInvestment);
       data.invest_amount = latestInvestment;
       const savedArbitrage = await arbitrageRepository.save(data);
 
       res.status(201).send(savedArbitrage);
+    } catch (err) {
+      res.status(500).send({
+        message: "Some error occurred while saving data."
+      });
+    }
+  }
+
+  async adjustInvestment(req: Request, res: Response) {
+    const data = req.body;
+
+    try {
+      let max = 500;
+      let min = 100;
+      let randomNumber = Math.floor(Math.random() * (max - min + 1) + min)
+      let previousTotalInvestment = await arbitrageRepository.getLastInvestment();
+      let latestInvestment = previousTotalInvestment.gozisk_investment + randomNumber;
+      await arbitrageRepository.updateLatestInvestment(latestInvestment);
+
+      res.status(201).send(
+        {
+          previousInvestment: previousTotalInvestment.gozisk_investment,
+          latestInvestment: latestInvestment,
+          increasedBy: randomNumber
+        });
     } catch (err) {
       res.status(500).send({
         message: "Some error occurred while saving data."

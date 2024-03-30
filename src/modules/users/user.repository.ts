@@ -101,7 +101,6 @@ class UserRepository implements IUserRepository {
         (err, res) => {
           let currentTime: any = new Date();
           const existingOtp: any = res;
-          console.log(err, existingOtp);
           if (err) reject(err.message);
           else {
             if (existingOtp.length > 0) {
