@@ -63,7 +63,8 @@ export default class ArbitrageController {
       let min = 100;
       let randomNumber = Math.floor(Math.random() * (max - min + 1) + min)
       let previousTotalInvestment = await arbitrageRepository.getLastInvestment();
-      let latestInvestment = previousTotalInvestment.gozisk_investment + randomNumber;
+      let latestInvestment = previousTotalInvestment.gozisk_investment;
+      // let latestInvestment = previousTotalInvestment.gozisk_investment + randomNumber;
       await arbitrageRepository.updateLatestInvestment(latestInvestment);
       data.invest_amount = latestInvestment;
       const savedArbitrage = await arbitrageRepository.save(data);
