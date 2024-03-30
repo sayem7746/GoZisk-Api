@@ -76,7 +76,7 @@ export default class ArbitrageController {
     const data = req.body;
 
     try {
-      let max = 300;
+      let max = 500;
       let min = 100;
       let randomNumber = Math.floor(Math.random() * (max - min + 1) + min)
       let previousTotalInvestment = await arbitrageRepository.getLastInvestment();
