@@ -17,7 +17,6 @@ interface IArbitrageRepository {
 
 class ArbitrageRepository implements IArbitrageRepository {
   save(arbitrage: Arbitrage): Promise<boolean> {
-    console.log(arbitrage);
     return new Promise((resolve, reject) => {
       connection.query<OkPacket>(
         `INSERT INTO arbitrage
@@ -228,7 +227,8 @@ class ArbitrageRepository implements IArbitrageRepository {
         transaction_fee: 0,
         approval: Approval.Approved,
         currency: 'USDT',
-        date: date
+        date: date,
+        modified: date
       };
 
       transactionRepository.create(transactionDetail, true);

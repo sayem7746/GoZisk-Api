@@ -32,9 +32,17 @@ class TransactionRepository implements ITransactionRepository {
     async create(transaction: Partial<ITransaction>, notify: boolean = false): Promise<ITransaction> {
         let column_fields = '';
         let column_value = '';
-        Object.keys(transaction).forEach((key: string) => {
-            column_fields += `${key},`;
-            column_value += `"${transaction[key]}",`;
+        let modifiedOnProvided: boolean = false;
+        Object.keys(transaction).forEach((key: string, i: number) => {
+            if (key === 'modified') modifiedOnProvided = true;
+            if (i > 0) {
+                column_fields += `, ${key}`;
+                column_value += `, "${transaction[key]}"`;
+            } else {
+                column_fields += `${key}`;
+                column_value += `"${transaction[key]}"`;
+            }
+            
         });
 
         if (notify) {
@@ -62,10 +70,12 @@ class TransactionRepository implements ITransactionRepository {
         }
         
         return new Promise((resolve, reject) => {
+            let sqlScript = `INSERT INTO transaction (${column_fields} modified) VALUES(${column_value} now())`;
+            if (modifiedOnProvided) {
+                sqlScript = `INSERT INTO transaction (${column_fields}) VALUES(${column_value})`;
+            }
             connection.query<OkPacket>(
-                `INSERT INTO transaction 
-                    (${column_fields} modified) 
-                    VALUES(${column_value} now())`,
+                sqlScript,
                 (err, res) => {
                     if (err) {
                         reject(err);
