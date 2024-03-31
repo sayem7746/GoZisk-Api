@@ -72,6 +72,22 @@ export default class ArbitrageController {
     }
   }
 
+  async createBid(req: Request, res: Response) {
+    try {
+      let previousTotalInvestment = await arbitrageRepository.getLastInvestment();
+      let latestInvestment = previousTotalInvestment.gozisk_investment;
+      let arbitrageData = await arbitrageRepository.getExchangesRate(latestInvestment);
+      console.log(arbitrageData);
+      const savedArbitrage = await arbitrageRepository.save(arbitrageData.data);
+
+      res.status(200).send(arbitrageData);
+    } catch (err) {
+      res.status(500).send({
+        message: "Some error occurred while saving data."
+      });
+    }
+  }
+
   async adjustInvestment(req: Request, res: Response) {
     const data = req.body;
 

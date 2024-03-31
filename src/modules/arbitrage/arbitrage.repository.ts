@@ -8,6 +8,7 @@ import walletRepository from "../wallet/wallet.repository";
 import userRepository from "../users/user.repository";
 import { Approval } from "../../models/transaction.model";
 import transactionRepository from "../../repositories/transaction.repository";
+import { binance, kucoin, huobi, bybit, coinex, bingx, bitfinex, gateio, probit, bitmart } from 'ccxt';
 import moment from "moment";
 
 interface IArbitrageRepository {
@@ -16,6 +17,7 @@ interface IArbitrageRepository {
 
 class ArbitrageRepository implements IArbitrageRepository {
   save(arbitrage: Arbitrage): Promise<boolean> {
+    console.log(arbitrage);
     return new Promise((resolve, reject) => {
       connection.query<OkPacket>(
         `INSERT INTO arbitrage
@@ -304,6 +306,106 @@ class ArbitrageRepository implements IArbitrageRepository {
       acc[key].push(obj);
       return acc;
     }, {});
+  }
+
+  async getExchangesRate(investmentValue: number): Promise<any> {
+    const binance_ex = new binance();
+    const kuCoin_ex = new kucoin();
+    const houbi_ex = new huobi();
+    const bybit_ex = new bybit();
+    const coinex_ex = new coinex();
+    const bingx_ex = new bingx();
+    const bitfinex_ex = new bitfinex();
+    const gateio_ex = new gateio();
+    const probit_ex = new probit();
+    const bitmart_ex = new bitmart();
+    
+    return new Promise(async (resolve, reject) => {
+      const exchangeList: any[] = [
+        {
+          name: 'Binance',
+          value: await (await binance_ex.fetchTicker('BTC/USDT')).close as number
+        },
+        {
+          name: 'KuCoin',
+          value: await (await kuCoin_ex.fetchTicker('BTC/USDT')).close as number
+        },
+        {
+          name: 'Houbi',
+          value: await (await houbi_ex.fetchTicker('BTC/USDT')).close as number
+        },
+        // {
+        //   name: 'ByBit',
+        //   value: await (await bybit_ex.fetchTicker('BTC/USDT')).close as number
+        // },
+        // {
+        //   name: 'CoinEx',
+        //   value: await (await coinex_ex.fetchTicker('BTC/USDT')).close as number
+        // },
+        {
+          name: 'BingX',
+          value: await (await bingx_ex.fetchTicker('BTC/USDT')).close as number
+        },
+        {
+          name: 'BitFinex',
+          value: await (await bitfinex_ex.fetchTicker('BTC/USDT')).close as number
+        },
+        {
+          name: 'GateIO',
+          value: await (await gateio_ex.fetchTicker('BTC/USDT')).close as number
+        },
+        {
+          name: 'ProBit',
+          value: await (await probit_ex.fetchTicker('BTC/USDT')).close as number
+        },
+        {
+          name: 'BitMart',
+          value: await (await bitmart_ex.fetchTicker('BTC/USDT')).close as number
+        },
+      ];
+
+      let arbitrageData = this.calculateProfit(exchangeList, investmentValue);
+      resolve({exchangeList, data: arbitrageData});
+    });
+  }
+
+  calculateProfit(exchanges: any[], investmentValue: number): any {
+    let profit: number = 0;
+    let matchValue: number = 0;
+    let arbitrageData: any;
+    for(let i = 0; i < exchanges.length - 2; i++) {
+      for(let j = i + 1; j < exchanges.length - 1; j++) {
+        profit = this.getProfit(exchanges[i].value, exchanges[j].value)
+        if (Math.abs(profit) > matchValue) {
+          matchValue = Math.abs(profit);
+          if (profit > 0) {
+            arbitrageData = {
+              'invest_amount': investmentValue,
+              'exchange_from': exchanges[i].name,
+              'exchange_to': exchanges[j].name,
+              'coin_rate_from': exchanges[i].value,
+              'coin_rate_to': exchanges[j].value,
+              'profit_percentage': Math.abs(profit)
+            }
+          } else if (profit < 0) {
+            arbitrageData = {
+              'invest_amount': investmentValue,
+              'exchange_from': exchanges[j].name,
+              'exchange_to': exchanges[i].name,
+              'coin_rate_from': exchanges[j].value,
+              'coin_rate_to': exchanges[i].value,
+              'profit_percentage': Math.abs(profit)
+            }
+          }
+        }
+      }
+    }
+
+    return arbitrageData;
+  }
+
+  getProfit(val1: number, val2: number): number {
+    return Math.round((((val1-val2)/val1) * 100) * 10000) / 10000;
   }
 }
 
