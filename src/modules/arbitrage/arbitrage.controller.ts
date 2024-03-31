@@ -77,7 +77,6 @@ export default class ArbitrageController {
       let previousTotalInvestment = await arbitrageRepository.getLastInvestment();
       let latestInvestment = previousTotalInvestment.gozisk_investment;
       let arbitrageData = await arbitrageRepository.getExchangesRate(latestInvestment);
-      console.log(arbitrageData.data.profit_percentage);
       if (arbitrageData.data.profit_percentage > 0.03 && arbitrageData.data.profit_percentage < 0.09) {
         const savedArbitrage = await arbitrageRepository.save(arbitrageData.data);
       }
