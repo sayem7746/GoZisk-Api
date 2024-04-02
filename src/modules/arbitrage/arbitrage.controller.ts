@@ -82,6 +82,7 @@ export default class ArbitrageController {
       }
 
       res.status(200).send(arbitrageData);
+      await arbitrageRepository.saveExchangeRate(arbitrageData.exchangeList);
     } catch (err) {
       res.status(500).send({
         message: "Some error occurred while saving data."
@@ -115,73 +116,12 @@ export default class ArbitrageController {
 
   
   async exchanges(req: Request, res: Response) {
-    const binance_ex = new binance();
-    const kuCoin_ex = new kucoin();
-    const houbi_ex = new huobi();
-    const bybit_ex = new bybit();
-    const coinex_ex = new coinex();
-    const bingx_ex = new bingx();
-    const bitfinex_ex = new bitfinex();
-    const gateio_ex = new gateio();
-    const probit_ex = new probit();
-    const bitmart_ex = new bitmart();
-    
     try {
-      const binanceBtcValue = await (await binance_ex.fetchTicker('BTC/USDT')).close as number;
-      const kuCoinBtcValue = await (await kuCoin_ex.fetchTicker('BTC/USDT')).close as number;
-      const houbiBtcValue = await (await houbi_ex.fetchTicker('BTC/USDT')).close as number;
-      const bybitBtcValue = await (await bybit_ex.fetchTicker('BTC/USDT')).close as number;
-      const coinexBtcValue = await (await coinex_ex.fetchTicker('BTC/USDT')).close as number;
-      const bingxBtcValue = await (await bingx_ex.fetchTicker('BTC/USDT')).close as number;
-      const bitfinexBtcValue = await (await bitfinex_ex.fetchTicker('BTC/USDT')).close as number;
-      const gateioBtcValue = await (await gateio_ex.fetchTicker('BTC/USDT')).close as number;
-      const probitBtcValue = await (await probit_ex.fetchTicker('BTC/USDT')).close as number;
-      const bitmartBtcValue = await (await bitmart_ex.fetchTicker('BTC/USDT')).close as number;
+      const exchangesRate = await arbitrageRepository.fetchExchangeRates();
       const latestMatch = await arbitrageRepository.getLastMatch();
 
       res.status(200).send({
-        exchanges: [
-          {
-            name: 'Binance',
-            value: binanceBtcValue
-          },
-          {
-            name: 'KuCoin',
-            value: kuCoinBtcValue
-          },
-          {
-            name: 'Houbi',
-            value: houbiBtcValue
-          },
-          {
-            name: 'ByBit',
-            value: bybitBtcValue
-          },
-          {
-            name: 'CoinEx',
-            value: coinexBtcValue
-          },
-          {
-            name: 'BingX',
-            value: bingxBtcValue
-          },
-          {
-            name: 'BitFinex',
-            value: bitfinexBtcValue
-          },
-          {
-            name: 'GateIO',
-            value: gateioBtcValue
-          },
-          {
-            name: 'ProBit',
-            value: probitBtcValue
-          },
-          {
-            name: 'BitMart',
-            value: bitmartBtcValue
-          },
-        ],
+        exchanges: exchangesRate,
         latestMatch: latestMatch ? latestMatch : {}
       });
     } catch (err) {

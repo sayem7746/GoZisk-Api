@@ -131,6 +131,77 @@ class ArbitrageRepository implements IArbitrageRepository {
       );
     });
   }
+
+  saveExchangeRate(exchangeList: any) {
+    exchangeList.forEach(async (item: any) => {
+      let isExchangeExits = await this.isExistsExchange(item.name);
+      if (!isExchangeExits) {
+        this.saveRate(item.name, item.value);
+      } else {
+        this.updateRate(item.name, item.value);
+      }
+      
+    });
+  }
+
+  updateRate(name: string, value: number): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+        connection.query<OkPacket>(
+          `UPDATE exchange_rate
+              SET btc_value = ${value}
+              WHERE exchange_name = '${name}'`,
+          (err, res) => {
+              if (err) reject(err);
+              else resolve(true);
+              
+          }
+      );
+    });
+}
+
+  isExistsExchange(name: string): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      connection.query<any>(
+        `SELECT * FROM exchange_rate
+            WHERE exchange_name = '${name}'`,
+        (err, res) => {
+          if (err) reject(err);
+          else resolve(res.length > 0);
+        }
+      );
+    });
+  }
+
+  fetchExchangeRates(): Promise<any> {
+    return new Promise((resolve, reject) => {
+      connection.query<any>(
+        `SELECT exchange_name name, btc_value value FROM exchange_rate`,
+        (err, res) => {
+          if (err) reject(err);
+          else resolve(res);
+        }
+      );
+    });
+  }
+
+  saveRate(name: string, value: number): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      connection.query<OkPacket>(
+        `INSERT INTO exchange_rate
+        (exchange_name, btc_value)
+        VALUES(?, ?)`,
+        [
+          name,
+          value
+        ],
+        (err, res) => {
+          if (err) reject(err);
+          else
+            resolve(true)
+        }
+      );
+    });
+  }
   
   getArbitrageById(userId: number): Promise<UserArbitrage[]> {
     return new Promise((resolve, reject) => {
