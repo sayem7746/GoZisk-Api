@@ -70,7 +70,7 @@ class TransactionRepository implements ITransactionRepository {
         }
         
         return new Promise((resolve, reject) => {
-            let sqlScript = `INSERT INTO transaction (${column_fields} modified) VALUES(${column_value} now())`;
+            let sqlScript = `INSERT INTO transaction (${column_fields}, modified) VALUES(${column_value}, now())`;
             if (modifiedOnProvided) {
                 sqlScript = `INSERT INTO transaction (${column_fields}) VALUES(${column_value})`;
             }
