@@ -4,8 +4,6 @@ import connection from "../../db";
 import Package, { IPurchasePackage } from "./package.model";
 import PurchasePackage from "./package.model";
 import Wallet from "../wallet/wallet.model";
-import User from "../users/user.model";
-import walletRepository from "../wallet/wallet.repository";
 import userRepository from "../users/user.repository";
 
 interface IPackageRepository {
@@ -15,7 +13,7 @@ interface IPackageRepository {
 
 class PackageRepository implements IPackageRepository {
   retrieveAll(): Promise<Package[]> {
-    let query: string = "SELECT * FROM packages";
+    let query: string = "SELECT * FROM packages ORDER BY `order` ASC";
     let condition: string = "";
 
     return new Promise((resolve, reject) => {

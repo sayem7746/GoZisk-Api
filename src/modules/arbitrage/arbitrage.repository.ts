@@ -260,7 +260,10 @@ class ArbitrageRepository implements IArbitrageRepository {
     profit = Math.round(profit * 10000) / 10000;
     let originalUserProfit = Math.round(((amount * profit) / 100) * 10000) / 10000;
     let companyProfit: number = 0;
-    if (amount >= 10 && amount <= 499) {
+    if (amount >= 50 && amount <= 99) {
+      companyProfit = Math.round(((originalUserProfit * 60) / 100) * 10000) / 10000;
+      return [Math.round(((profit * 40) / 100) * 10000) / 10000, 40, `Today Arbitrage Profit is $${originalUserProfit} (${profit}%), out of your ${amount} investment.`, `$${companyProfit} (60%)`];
+    } else if (amount >= 100 && amount <= 499) {
       companyProfit = Math.round(((originalUserProfit * 55) / 100) * 10000) / 10000;
       return [Math.round(((profit * 45) / 100) * 10000) / 10000, 45, `Today Arbitrage Profit is $${originalUserProfit} (${profit}%), out of your ${amount} investment.`, `$${companyProfit} (55%)`];
     } else if (amount >= 500 && amount <= 999) {
