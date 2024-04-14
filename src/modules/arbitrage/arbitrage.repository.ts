@@ -140,7 +140,6 @@ class ArbitrageRepository implements IArbitrageRepository {
       } else {
         this.updateRate(item.name, item.value);
       }
-      
     });
   }
 
@@ -395,52 +394,69 @@ class ArbitrageRepository implements IArbitrageRepository {
     const bitmart_ex = new bitmart();
     
     return new Promise(async (resolve, reject) => {
+      let start = Date.now();
+
       const exchangeList: any[] = [
         {
           name: 'Binance',
-          value: await (await binance_ex.fetchTicker('BTC/USDT')).close as number
+          value: await this.getValue( 'Binance', binance_ex.fetchTicker('BTC/USDT'))
         },
         {
           name: 'KuCoin',
-          value: await (await kuCoin_ex.fetchTicker('BTC/USDT')).close as number
+          value: await this.getValue( 'KuCoin', kuCoin_ex.fetchTicker('BTC/USDT'))
         },
         {
           name: 'Houbi',
-          value: await (await houbi_ex.fetchTicker('BTC/USDT')).close as number
+          value: await this.getValue( 'Houbi', houbi_ex.fetchTicker('BTC/USDT'))
         },
-        // {
-        //   name: 'ByBit',
-        //   value: await (await bybit_ex.fetchTicker('BTC/USDT')).close as number
-        // },
-        // {
-        //   name: 'CoinEx',
-        //   value: await (await coinex_ex.fetchTicker('BTC/USDT')).close as number
-        // },
+        {
+          name: 'ByBit',
+          value: await this.getValue( 'ByBit', bybit_ex.fetchTicker('BTC/USDT'))
+        },
+        {
+          name: 'CoinEx',
+          value: await this.getValue( 'CoinEx', coinex_ex.fetchTicker('BTC/USDT'))
+        },
         {
           name: 'BingX',
-          value: await (await bingx_ex.fetchTicker('BTC/USDT')).close as number
+          value: await this.getValue( 'BingX', bingx_ex.fetchTicker('BTC/USDT'))
         },
-        {
-          name: 'BitFinex',
-          value: await (await bitfinex_ex.fetchTicker('BTC/USDT')).close as number
-        },
-        {
-          name: 'GateIO',
-          value: await (await gateio_ex.fetchTicker('BTC/USDT')).close as number
-        },
+        // {
+        //   name: 'BitFinex',
+        //   value: await this.getValue( 'BitFinex', bitfinex_ex.fetchTicker('BTC/USDT'))
+        // },
+        // {
+        //   name: 'GateIO',
+        //   value: await this.getValue( 'GateIO', gateio_ex.fetchTicker('BTC/USDT'))
+        // },
         {
           name: 'ProBit',
-          value: await (await probit_ex.fetchTicker('BTC/USDT')).close as number
+          value: await this.getValue( 'ProBit', probit_ex.fetchTicker('BTC/USDT'))
         },
         {
           name: 'BitMart',
-          value: await (await bitmart_ex.fetchTicker('BTC/USDT')).close as number
+          value: await this.getValue( 'BitMart', bitmart_ex.fetchTicker('BTC/USDT'))
         },
       ];
-
+      let timeTaken = Date.now() - start;
+      console.log("Total time taken : " + timeTaken + " milliseconds");
+      console.log(exchangeList, "Total time taken : " + timeTaken + " milliseconds");
       let arbitrageData = this.calculateProfit(exchangeList, investmentValue);
       resolve({exchangeList, data: arbitrageData});
     });
+  }
+
+  async getValue(exName: string, func: any): Promise<number> {
+    console.log('Exchange Name', exName);
+    let exValue = await (await func).close as number
+
+    let isExchangeExits = await this.isExistsExchange(exName);
+      if (!isExchangeExits) {
+        this.saveRate(exName, exValue);
+      } else {
+        this.updateRate(exName, exValue);
+      }
+    return exValue;
   }
 
   calculateProfit(exchanges: any[], investmentValue: number): any {

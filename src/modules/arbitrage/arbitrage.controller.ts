@@ -82,7 +82,6 @@ export default class ArbitrageController {
       }
 
       res.status(200).send(arbitrageData);
-      await arbitrageRepository.saveExchangeRate(arbitrageData.exchangeList);
     } catch (err) {
       res.status(500).send({
         message: "Some error occurred while saving data."
