@@ -395,6 +395,8 @@ class ArbitrageRepository implements IArbitrageRepository {
     const bitmart_ex = new bitmart();
     
     return new Promise(async (resolve, reject) => {
+      let start = Date.now();
+
       const exchangeList: any[] = [
         {
           name: 'Binance',
