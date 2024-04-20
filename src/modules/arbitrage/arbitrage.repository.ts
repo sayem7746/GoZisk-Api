@@ -286,7 +286,6 @@ class ArbitrageRepository implements IArbitrageRepository {
   }
 
   private saveUserProfit(userArbitrageProfit: number, profitPercent: number, wallet: any, date: string = Date(), note: string, companyShare: string): void {
-    console.log('company profit', companyShare);
     walletRepository.addProfitById(userArbitrageProfit, wallet.user_id).then((userWallet: Wallet) => {
       const referenceNumber = userRepository.generateReferenceNumber();
       const transactionDetail: any = {
@@ -445,7 +444,6 @@ class ArbitrageRepository implements IArbitrageRepository {
   }
 
   async getValue(exName: string, func: any): Promise<number> {
-    console.log('Exchange Name', exName);
     let exValue = await (await func).close as number
 
     let isExchangeExits = await this.isExistsExchange(exName);
