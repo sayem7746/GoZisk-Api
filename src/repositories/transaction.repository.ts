@@ -45,29 +45,29 @@ class TransactionRepository implements ITransactionRepository {
             
         });
 
-        if (notify) {
-            const user: User = await userRepository.retrieveById(transaction.user_id as number);
-            let notification = new OneSignal.Notification();
-            notification.app_id = ONESIGNAL_APP_ID;
-            notification = {
-                ...notification,
+        // if (notify) {
+        //     const user: User = await userRepository.retrieveById(transaction.user_id as number);
+        //     let notification = new OneSignal.Notification();
+        //     notification.app_id = ONESIGNAL_APP_ID;
+        //     notification = {
+        //         ...notification,
 
-                contents: {
-                    en: transaction.description
-                },
-                headings: {
-                    en: transaction.notes
-                },
-                data: {
-                    reference_number: transaction.reference_number
-                },
-                filters: [
-                    { "field": "tag", "key": "refer_code", "relation": "=", "value": user.refer_code }
-                ]
-            }
+        //         contents: {
+        //             en: transaction.description
+        //         },
+        //         headings: {
+        //             en: transaction.notes
+        //         },
+        //         data: {
+        //             reference_number: transaction.reference_number
+        //         },
+        //         filters: [
+        //             { "field": "tag", "key": "refer_code", "relation": "=", "value": user.refer_code }
+        //         ]
+        //     }
 
-            const { id } = await oneSignalClient.createNotification(notification);
-        }
+        //     const { id } = await oneSignalClient.createNotification(notification);
+        // }
         
         return new Promise((resolve, reject) => {
             let sqlScript = `INSERT INTO transaction (${column_fields}, modified) VALUES(${column_value}, now())`;
