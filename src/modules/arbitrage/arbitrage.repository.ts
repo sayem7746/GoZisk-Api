@@ -247,10 +247,10 @@ class ArbitrageRepository implements IArbitrageRepository {
         [userProfitPercent, actualUserProfitPercent, note, companyShare] = this.getUserProfitPercent(profit_percentage, wallet.invest_wallet);
         
         userArbitrageProfit = Math.round(((wallet.invest_wallet * userProfitPercent) / 100) * 10000) / 10000;
-        // this.saveUserProfit(userArbitrageProfit, actualUserProfitPercent, wallet, todayDate, note, companyShare);
-        // walletRepository.updateUserArbitrageProfit(wallet.user_id, wallet.invest_wallet, userProfitPercent, userArbitrageProfit, todayDate);
+        this.saveUserProfit(userArbitrageProfit, actualUserProfitPercent, wallet, todayDate, note, companyShare);
+        walletRepository.updateUserArbitrageProfit(wallet.user_id, wallet.invest_wallet, userProfitPercent, userArbitrageProfit, todayDate);
         
-        walletRepository.calcRoiBonus(wallet.username as string, wallet.referrer_id, userArbitrageProfit, todayDate);
+        // walletRepository.calcRoiBonus(wallet.username as string, wallet.referrer_id, userArbitrageProfit, todayDate);
       }
     });
   }
