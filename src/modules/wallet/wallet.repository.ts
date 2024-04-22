@@ -572,7 +572,7 @@ class WalletRepository implements IWalletRepository {
     retrieveWithdrawalByUserId(userId: number): Promise<IWithdraw[]> {
         return new Promise((resolve, reject) => {
             connection.query<IWithdraw[]>(
-                "SELECT * FROM withdraw WHERE user_id = ?",
+                "SELECT * FROM withdraw WHERE user_id = ? ORDER BY id DESC",
                 [userId],
                 (err, res) => {
                     if (err) reject(err);
