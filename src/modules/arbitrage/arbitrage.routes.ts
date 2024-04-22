@@ -11,7 +11,7 @@ class ArbitrageRoutes {
   }
 
   intializeRoutes() {
-    this.router.get("/calculate", this.controller.arbitrageCalculate);
+    this.router.get("/calculate", this.controller.arbitrageSplitCalculate);
     this.router.get("/adjust", this.controller.adjustInvestment);
 
     // Auth required.
@@ -19,7 +19,7 @@ class ArbitrageRoutes {
     this.router.get("/all", auth, this.controller.exchanges);
     this.router.get("/latest/marketprice", auth, this.controller.getLatestEightWeeks);
     this.router.get("/users/:id", auth, this.controller.arbitrageById);
-    this.router.get("/calculate/date/:date", auth, this.controller.arbitrageCalculate);
+    this.router.get("/calculate/date/:date", auth, this.controller.arbitrageSplitCalculate);
     this.router.get("/filter/date/:date", auth, this.controller.arbitrageFilter);
     this.router.get("/filter", this.controller.arbitrageFilter);
     this.router.get("/bids/date/:date", auth, this.controller.arbitrageBidsByDate);

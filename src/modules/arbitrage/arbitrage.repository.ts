@@ -300,8 +300,7 @@ class ArbitrageRepository implements IArbitrageRepository {
         transaction_fee: 0,
         approval: Approval.Approved,
         currency: 'USDT',
-        date: date,
-        modified: date
+        date: date
       };
 
       transactionRepository.create(transactionDetail, true);

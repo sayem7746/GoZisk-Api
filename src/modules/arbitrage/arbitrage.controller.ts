@@ -227,9 +227,33 @@ export default class ArbitrageController {
     try {
       const todayProfitPercentage: number = await arbitrageRepository.getTotalArbitrageProfitPercentageByDate(todayDate);
       const allUserWallet: Wallet[] = await walletRepository.retrieveAll();
+
       await arbitrageRepository.calcArbitrageProfit(todayProfitPercentage, allUserWallet, todayDate);
 
-      // const userAllArbitrage: UserArbitrage[] = await arbitrageRepository.getArbitrageById(userId);
+      res.status(200).send({todayDate, todayProfitPercentage, allUserWallet});
+    } catch (err) {
+      res.status(500).send({
+        message: "Some error occurred while calculating arbitrage."
+      });
+    }
+  }
+
+  async arbitrageSplitCalculate(req: Request, res: Response) {
+    let todayDate = '';
+    if (req.params.date) {
+      todayDate = req.params.date;
+    } else {
+      todayDate = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+    }
+
+    try {
+      const todayProfitPercentage: number = await arbitrageRepository.getTotalArbitrageProfitPercentageByDate(todayDate);
+      const allUserWallet: Wallet[] = await walletRepository.retrieveAll();
+
+      var size = 100; 
+      for (var i=0; i<allUserWallet.length; i+=size) {
+          await arbitrageRepository.calcArbitrageProfit(todayProfitPercentage, allUserWallet.slice(i,i+size), todayDate);
+      }
       res.status(200).send({todayDate, todayProfitPercentage, allUserWallet});
     } catch (err) {
       res.status(500).send({

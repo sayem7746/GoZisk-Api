@@ -430,8 +430,7 @@ class WalletRepository implements IWalletRepository {
                     transaction_fee: 0,
                     approval: Approval.Approved,
                     currency: 'USDT',
-                    date: date,
-                    modified: date
+                    date: date
                 };
 
                 await transactionRepository.create(transactionDetail);
