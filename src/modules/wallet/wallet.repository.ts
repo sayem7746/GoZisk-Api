@@ -658,7 +658,7 @@ class WalletRepository implements IWalletRepository {
         `CALL getTotalGroupSaleDetail(${userId}, '${dateForm}', '${dateTo}')`,
         (err, res) => {
           if (err) reject(err);
-          else resolve(res[0][0]);
+          else resolve(res[0]);
         }
       )
     });
