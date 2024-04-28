@@ -516,4 +516,24 @@ export default class UserController {
             });
         }
     }
+
+    async getGroupSale(req: Request, res: Response) {
+        const userId = parseInt(req.params.userId);
+        const dateFrom = req.params.dateFrom;
+        const dateTo = req.params.dateTo;
+
+        try {
+            const groupSaleDetail: any[] = await walletRepository.fetchGroupSale(userId, dateFrom, dateTo);
+            if (groupSaleDetail) {
+                res.status(200).send(groupSaleDetail);
+            } else {
+                res.status(500).send({ 'error': 'No sale found!' });
+            }
+            
+        } catch (err) {
+            res.status(500).send({
+                message: `Error retrieving data.`
+            });
+        }
+    }
 }

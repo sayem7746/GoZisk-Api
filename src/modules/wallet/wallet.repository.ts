@@ -649,6 +649,20 @@ class WalletRepository implements IWalletRepository {
             );
         });
     }
+
+
+  async fetchGroupSale(userId: number, dateForm: string, dateTo: string): Promise<any[]> {
+    console.log(`CALL getTotalGroupSaleDetail(${userId}, '${dateForm}', '${dateTo}')`);
+    return new Promise((resolve, reject) => {
+      connection.query<any[]>(
+        `CALL getTotalGroupSaleDetail(${userId}, '${dateForm}', '${dateTo}')`,
+        (err, res) => {
+          if (err) reject(err);
+          else resolve(res[0][0]);
+        }
+      )
+    });
+  }
 }
 
 export default new WalletRepository();

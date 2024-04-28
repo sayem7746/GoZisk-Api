@@ -47,6 +47,9 @@ class UserRoutes {
     // report
     this.router.get("/report/:view/all", auth, this.controller.getAllWallet);
     this.router.get("/report/paramname/:paramname/paramvalue/:paramvalue", auth, this.controller.getWalletByParams);
+
+    // fetch group sale according to date
+    this.router.get("/group-sale/:userId/:dateFrom/:dateTo", auth, this.controller.getGroupSale);
   }
 }
 
