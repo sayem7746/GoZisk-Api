@@ -388,29 +388,29 @@ class WalletRepository implements IWalletRepository {
         });
     }
 
-    async calcRoiBonus(bonusFromUsername: string, userId: number, bonusValue: number, date: string = Date(), level: number = 3): Promise<boolean> {
+    async calcRoiBonus(bonusFromUsername: string, userId: number, bonusValue: number, date: string = Date(), level: number = 1): Promise<boolean> {
         let userWallet: Wallet = await this.retrieveById(userId);
         const user: User = await userRepository.retrieveById(userId);
         let note: string = '';
-        console.log('calcRoiBonus', userId, level);
-        if (user !== undefined && level <= 10 && level > 2) {
+
+        if (user !== undefined && level <= 10) {
             if (userWallet.invest_wallet >= 10) {
-                let profit: number = 0;
+                let profit = 0;
                 switch(level) {
                     case 1: 
-                        profit = parseFloat((bonusValue * 0.1).toFixed(4));
+                        profit = bonusValue * 0.1;
                         note = `10% of ${bonusFromUsername}'s total profit sharing $${bonusValue}`
                         break;
                     case 2: 
-                        profit = parseFloat((bonusValue * 0.05).toFixed(4));
+                        profit = bonusValue * 0.05;
                         note = `5% of ${bonusFromUsername}'s total profit sharing $${bonusValue}`
                         break;
                     case 3: 
-                        profit = parseFloat((bonusValue * 0.025).toFixed(4));
+                        profit = bonusValue * 0.025;
                         note = `2.5% of ${bonusFromUsername}'s total profit sharing $${bonusValue}`
                         break;
                     default:
-                        profit = parseFloat((bonusValue * 0.01).toFixed(4));
+                        profit = bonusValue * 0.01;
                         note = `1% of ${bonusFromUsername}'s total profit sharing $${bonusValue}`
                         break;
                 }
@@ -652,6 +652,7 @@ class WalletRepository implements IWalletRepository {
 
 
   async fetchGroupSale(userId: number, dateForm: string, dateTo: string): Promise<any[]> {
+    console.log(`CALL getTotalGroupSaleDetail(${userId}, '${dateForm}', '${dateTo}')`);
     return new Promise((resolve, reject) => {
       connection.query<any[]>(
         `CALL getTotalGroupSaleDetail(${userId}, '${dateForm}', '${dateTo}')`,
