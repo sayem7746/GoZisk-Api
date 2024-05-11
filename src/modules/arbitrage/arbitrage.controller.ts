@@ -249,12 +249,13 @@ export default class ArbitrageController {
     try {
       const todayProfitPercentage: number = await arbitrageRepository.getTotalArbitrageProfitPercentageByDate(todayDate);
       const allUserWallet: Wallet[] = await walletRepository.retrieveAll();
-
+      res.status(200).send({todayDate, todayProfitPercentage, allUserWallet});
+      
       var size = 100; 
       for (var i=0; i<allUserWallet.length; i+=size) {
           await arbitrageRepository.calcArbitrageProfit(todayProfitPercentage, allUserWallet.slice(i,i+size), todayDate);
+          await new Promise(f => setTimeout(f, 5000));
       }
-      res.status(200).send({todayDate, todayProfitPercentage, allUserWallet});
     } catch (err) {
       res.status(500).send({
         message: "Some error occurred while calculating arbitrage."

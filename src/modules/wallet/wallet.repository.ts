@@ -395,22 +395,22 @@ class WalletRepository implements IWalletRepository {
 
         if (user !== undefined && level <= 10) {
             if (userWallet.invest_wallet >= 10) {
-                let profit = 0;
+                let profit: number = 0;
                 switch(level) {
                     case 1: 
-                        profit = bonusValue * 0.1;
+                        profit = parseFloat((bonusValue * 0.1).toFixed(4));
                         note = `10% of ${bonusFromUsername}'s total profit sharing $${bonusValue}`
                         break;
                     case 2: 
-                        profit = bonusValue * 0.05;
+                        profit = parseFloat((bonusValue * 0.05).toFixed(4));
                         note = `5% of ${bonusFromUsername}'s total profit sharing $${bonusValue}`
                         break;
                     case 3: 
-                        profit = bonusValue * 0.025;
+                        profit = parseFloat((bonusValue * 0.025).toFixed(4));
                         note = `2.5% of ${bonusFromUsername}'s total profit sharing $${bonusValue}`
                         break;
                     default:
-                        profit = bonusValue * 0.01;
+                        profit = parseFloat((bonusValue * 0.01).toFixed(4));
                         note = `1% of ${bonusFromUsername}'s total profit sharing $${bonusValue}`
                         break;
                 }
@@ -433,7 +433,7 @@ class WalletRepository implements IWalletRepository {
                     date: date
                 };
 
-                await transactionRepository.create(transactionDetail);
+                await transactionRepository.create(transactionDetail, true);
             }
 
             this.calcRoiBonus(bonusFromUsername, user.referrer_id, bonusValue, date, level + 1);
@@ -652,7 +652,6 @@ class WalletRepository implements IWalletRepository {
 
 
   async fetchGroupSale(userId: number, dateForm: string, dateTo: string): Promise<any[]> {
-    console.log(`CALL getTotalGroupSaleDetail(${userId}, '${dateForm}', '${dateTo}')`);
     return new Promise((resolve, reject) => {
       connection.query<any[]>(
         `CALL getTotalGroupSaleDetail(${userId}, '${dateForm}', '${dateTo}')`,
