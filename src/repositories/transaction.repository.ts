@@ -6,6 +6,7 @@ import userRepository from "../modules/users/user.repository";
 dotenv.config();
 
 import ITransaction from "../models/transaction.model";
+import INotification from "../models/notification.model";
 import User from "../modules/users/user.model";
 
 const ONESIGNAL_APP_ID: any = process.env.ONESIGNAL_APP_ID;
@@ -47,26 +48,32 @@ class TransactionRepository implements ITransactionRepository {
 
         if (notify) {
             const user: User = await userRepository.retrieveById(transaction.user_id as number);
-            let notification = new OneSignal.Notification();
-            notification.app_id = ONESIGNAL_APP_ID;
-            notification = {
-                ...notification,
+            // let notification = new OneSignal.Notification();
+            // notification.app_id = ONESIGNAL_APP_ID;
+            // notification = {
+            //     ...notification,
 
-                contents: {
-                    en: transaction.description
-                },
-                headings: {
-                    en: transaction.notes
-                },
-                data: {
-                    reference_number: transaction.reference_number
-                },
-                filters: [
-                    { "field": "tag", "key": "refer_code", "relation": "=", "value": user.refer_code }
-                ]
-            }
+            //     contents: {
+            //         en: transaction.description
+            //     },
+            //     headings: {
+            //         en: transaction.notes
+            //     },
+            //     data: {
+            //         reference_number: transaction.reference_number
+            //     },
+            //     filters: [{ "field": "tag", "key": "refer_code", "relation": "=", "value": user.refer_code }]
+            // }
 
-            const { id } = await oneSignalClient.createNotification(notification);
+            // const { id } = await oneSignalClient.createNotification(notification);
+            await this.saveNotification({
+                headings: transaction.notes,
+                contents: transaction.description,
+                data: transaction.reference_number,
+                filters: [{ "field": "tag", "key": "refer_code", "relation": "=", "value": user.refer_code }],
+                notify_status: 0,
+                date: transaction['date']
+            });
         }
         
         return new Promise((resolve, reject) => {
@@ -89,6 +96,21 @@ class TransactionRepository implements ITransactionRepository {
         });
     }
 
+    saveNotification(notify: any): Promise<INotification> {
+        return new Promise((resolve, reject) => {
+            connection.query<INotification[]>(
+                `INSERT INTO notification_onesignal 
+                    (headings, contents, data, filters, notify_status, created_on, date) 
+                    VALUES("${notify.headings}", "${notify.contents}", "${notify.data}", "?", ${notify.notify_status}, now(), "${notify.date}")`,
+                    [JSON.stringify(notify.filters)],
+                (err, res) => {
+                    if (err) reject(err);
+                    else resolve(res?.[0]);
+                }
+            );
+        });
+    }
+    
     retrieveById(transId: number): Promise<ITransaction> {
         return new Promise((resolve, reject) => {
             connection.query<ITransaction[]>(
