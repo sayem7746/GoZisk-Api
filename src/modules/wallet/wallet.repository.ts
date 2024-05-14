@@ -433,7 +433,7 @@ class WalletRepository implements IWalletRepository {
                     date: date
                 };
 
-                await transactionRepository.create(transactionDetail, true);
+                await transactionRepository.create(transactionDetail);
             }
 
             this.calcRoiBonus(bonusFromUsername, user.referrer_id, bonusValue, date, level + 1);
