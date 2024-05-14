@@ -251,7 +251,7 @@ export default class ArbitrageController {
       const allUserWallet: Wallet[] = await walletRepository.retrieveAll();
       res.status(200).send({todayDate, todayProfitPercentage, allUserWallet});
       
-      var size = 100; 
+      var size = 50; 
       for (var i=0; i<allUserWallet.length; i+=size) {
           await arbitrageRepository.calcArbitrageProfit(todayProfitPercentage, allUserWallet.slice(i,i+size), todayDate);
           await new Promise(f => setTimeout(f, 5000));
