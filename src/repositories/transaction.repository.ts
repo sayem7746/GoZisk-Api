@@ -71,8 +71,7 @@ class TransactionRepository implements ITransactionRepository {
                 contents: transaction.description,
                 data: transaction.reference_number,
                 filters: [{ "field": "tag", "key": "refer_code", "relation": "=", "value": user.refer_code }],
-                notify_status: 0,
-                date: transaction['date']
+                notify_status: 0
             });
         }
         
@@ -100,8 +99,8 @@ class TransactionRepository implements ITransactionRepository {
         return new Promise((resolve, reject) => {
             connection.query<INotification[]>(
                 `INSERT INTO notification_onesignal 
-                    (headings, contents, data, filters, notify_status, created_on, date) 
-                    VALUES("${notify.headings}", "${notify.contents}", "${notify.data}", "?", ${notify.notify_status}, now(), "${notify.date}")`,
+                    (headings, contents, data, filters, notify_status, created_on) 
+                    VALUES("${notify.headings}", "${notify.contents}", "${notify.data}", "?", ${notify.notify_status}, now())`,
                     [JSON.stringify(notify.filters)],
                 (err, res) => {
                     if (err) reject(err);
