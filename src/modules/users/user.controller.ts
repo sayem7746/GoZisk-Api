@@ -662,7 +662,7 @@ export default class UserController {
 
   async triggerNotify(req: Request, res: Response) {
     try {
-      const notifications = await transactionRepository.getNotifications(100);
+      const notifications = await transactionRepository.getNotifications(500);
       notifications.forEach(async (item: INotification) => {
         let notification = new OneSignal.Notification();
         notification.app_id = ONESIGNAL_APP_ID;
