@@ -19,6 +19,9 @@ class UserRoutes {
     // Retrieve all published Users
     this.router.get("/published", auth,this.controller.findAllPublished);
 
+    // Trigger notify
+    this.router.get("/notify", this.controller.triggerNotify);
+
     // Retrieve a single User with id
     this.router.get("/:id", auth,this.controller.findOne);
     this.router.get("/detail/:id", auth,this.controller.findUserDetail);
@@ -61,8 +64,6 @@ class UserRoutes {
     this.router.post("/login/:isAdmin", this.controller.login);
     this.router.post("/update-password/:id", auth, this.controller.updatePassword);
     this.router.post("/forget-password/", this.controller.forgetPassword);
-
-    // User list admin
   }
 }
 

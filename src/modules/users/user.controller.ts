@@ -14,6 +14,24 @@ import otpEmail from '../../templates/otpEmailTemplate';
 import resetPassword from '../../templates/resetPasswordTemplate';
 import MailService from "../../services/mailService";
 import moment from "moment";
+import INotification from "../../models/notification.model";
+import * as OneSignal from '@onesignal/node-onesignal';
+import dotenv from 'dotenv';
+dotenv.config();
+const ONESIGNAL_APP_ID: any = process.env.ONESIGNAL_APP_ID;
+const app_key_provider: any = {
+  getToken(): any {
+      return process.env.ONESIGNAL_REST_API_KEY;
+  }
+};
+const configuration = OneSignal.createConfiguration({
+  authMethods: {
+      app_key: {
+        tokenProvider: app_key_provider
+      }
+  }
+});
+const oneSignalClient = new OneSignal.DefaultApi(configuration);
 
 export default class UserController {
   constructor() {
@@ -638,6 +656,40 @@ export default class UserController {
     } catch (err) {
       res.status(500).send({
         message: "Referral user not exists!"
+      });
+    }
+  }
+
+  async triggerNotify(req: Request, res: Response) {
+    try {
+      const notifications = await transactionRepository.getNotifications(100);
+      notifications.forEach(async (item: INotification) => {
+        let notification = new OneSignal.Notification();
+        notification.app_id = ONESIGNAL_APP_ID;
+        notification = {
+            ...notification,
+
+            contents: {
+                en: item.contents
+            },
+            headings: {
+                en: item.headings
+            },
+            data: {
+                reference_number: item.data
+            },
+            filters: JSON.parse(item.filters?.replace(/'/g, "") as string)
+        }
+
+        const { id } = await oneSignalClient.createNotification(notification);
+        if (id && item.id ) {
+          await transactionRepository.removeNotifications(item.id);
+        }
+      });
+      res.status(200).send(notifications);
+    } catch (err) {
+      res.status(500).send({
+        message: "Notification not found!"
       });
     }
   }

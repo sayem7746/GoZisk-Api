@@ -154,6 +154,21 @@ class TransactionRepository implements ITransactionRepository {
         });
     }
 
+    getNotifications(limit: number = 5): Promise<INotification[]> {
+        return new Promise((resolve, reject) => {
+            connection.query<INotification[]>(
+                `SELECT * FROM notification_onesignal 
+                    WHERE notify_status = 0
+                    ORDER BY id
+                    LIMIT 0,${limit}`,
+                (err, res) => {
+                    if (err) reject(err);
+                    else resolve(res);
+                }
+            );
+        });
+    }
+
     updateTransactions(transId: number, read_status: number): Promise<ITransaction[]> {
         return new Promise((resolve, reject) => {
             connection.query<ITransaction[]>(
@@ -179,6 +194,20 @@ class TransactionRepository implements ITransactionRepository {
                     else resolve(res);
                 }
             );
+        });
+    }
+
+
+    removeNotifications(notificationId: number): Promise<number> {
+        return new Promise((resolve, reject) => {
+        connection.query<OkPacket>(
+            "DELETE FROM notification_onesignal WHERE id = ?",
+            [notificationId],
+            (err, res) => {
+            if (err) reject(err);
+            else resolve(res.affectedRows);
+            }
+        );
         });
     }
 }
