@@ -9,7 +9,7 @@ import * as OneSignal from '@onesignal/node-onesignal';
 import dotenv from 'dotenv';
 import userRepository from "../users/user.repository";
 import transactionRepository from "../../repositories/transaction.repository";
-import { Approval } from "../../models/transaction.model";
+import ITransaction, { Approval } from "../../models/transaction.model";
 dotenv.config();
 
 const ONESIGNAL_APP_ID: any = process.env.ONESIGNAL_APP_ID;
@@ -172,6 +172,24 @@ export default class ArbitrageController {
         },
         totalCompanyInvestment: totalGoziskInvestment.gozisk_investment
       });
+    } catch (err) {
+      res.status(500).send({
+        message: "Some error occurred while retrieving arbitrage data."
+      });
+    }
+  }
+
+  async resetArbitrageByDate(req: Request, res: Response) {
+    const date = req.params.date;
+    console.log(date);
+    try {
+      const allArbitrageTransactions = await arbitrageRepository.getAllArbitrageTransactions(date);
+      allArbitrageTransactions.forEach(async (transaction: ITransaction) => {
+        await arbitrageRepository.resetTransactions(transaction);
+      });
+      await arbitrageRepository.removeArbitrfageTransactionByDate(date);
+
+      res.status(200).send(allArbitrageTransactions);
     } catch (err) {
       res.status(500).send({
         message: "Some error occurred while retrieving arbitrage data."

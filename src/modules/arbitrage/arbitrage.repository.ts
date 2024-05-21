@@ -6,7 +6,7 @@ import UserArbitrage from "./arbitrage.model";
 import Wallet from "../wallet/wallet.model";
 import walletRepository from "../wallet/wallet.repository";
 import userRepository from "../users/user.repository";
-import { Approval } from "../../models/transaction.model";
+import ITransaction, { Approval } from "../../models/transaction.model";
 import transactionRepository from "../../repositories/transaction.repository";
 import { binance, kucoin, huobi, bybit, coinex, bingx, bitfinex, gateio, probit, bitmart } from 'ccxt';
 import moment from "moment";
@@ -70,6 +70,47 @@ class ArbitrageRepository implements IArbitrageRepository {
         `SELECT * FROM arbitrage
             WHERE  profit_percentage > 0.03 AND status = 1 AND modified_on BETWEEN '${date} 00:00:00' AND '${date} 23:59:00'
             ORDER BY id DESC`,
+        (err, res) => {
+          if (err) reject(err);
+          else resolve(res);
+        }
+      );
+    });
+  }
+
+  getAllArbitrageTransactions(date: string): Promise<Arbitrage> {
+    console.log(`SELECT * FROM transaction
+    WHERE (type = 'ArbitrageBonus' OR type = 'ArbitrageRoiBonus') AND CAST(date as DATE) = '${date}'`);
+    return new Promise((resolve, reject) => {
+      connection.query<any>(
+        `SELECT * FROM transaction
+            WHERE (type = 'ArbitrageBonus' OR type = 'ArbitrageRoiBonus') AND CAST(date as DATE) = '${date}'`,
+        (err, res) => {
+          if (err) reject(err);
+          else resolve(res);
+        }
+      );
+    });
+  }
+
+  resetTransactions(transaction: ITransaction): Promise<any[]> {
+    return new Promise((resolve, reject) => {
+      connection.query<any>(
+        `UPDATE wallet
+                SET net_wallet = net_wallet - ${transaction.amount}, roi_wallet = roi_wallet - ${transaction.amount}
+                WHERE user_id=${transaction.user_id}`,
+        (err, res) => {
+          if (err) reject(err);
+          else resolve(res);
+        }
+      );
+    });
+  }
+
+  removeArbitrfageTransactionByDate(date: string): Promise<any[]> {
+    return new Promise((resolve, reject) => {
+      connection.query<any>(
+        `DELETE FROM transaction WHERE (type = 'ArbitrageBonus' OR type = 'ArbitrageRoiBonus') AND CAST(date as DATE) = '${date}'`,
         (err, res) => {
           if (err) reject(err);
           else resolve(res);

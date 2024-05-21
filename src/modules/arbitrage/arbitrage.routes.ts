@@ -16,10 +16,16 @@ class ArbitrageRoutes {
 
     // Auth required.
     this.router.get("/date/:date", auth, this.controller.getByDate);
+
     this.router.get("/all", auth, this.controller.exchanges);
     this.router.get("/latest/marketprice", auth, this.controller.getLatestEightWeeks);
     this.router.get("/users/:id", auth, this.controller.arbitrageById);
+
+    // manually calculate arbitrage by date
     this.router.get("/calculate/date/:date", auth, this.controller.arbitrageSplitCalculate);
+    // reset arbitrage by date
+    this.router.get("/reset/date/:date", auth, this.controller.resetArbitrageByDate);
+
     this.router.get("/filter/date/:date", auth, this.controller.arbitrageFilter);
     this.router.get("/filter", this.controller.arbitrageFilter);
     this.router.get("/bids/date/:date", auth, this.controller.arbitrageBidsByDate);
