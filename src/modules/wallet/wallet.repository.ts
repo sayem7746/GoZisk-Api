@@ -597,7 +597,7 @@ class WalletRepository implements IWalletRepository {
     retrieveWithdrawal(): Promise<IWithdraw[]> {
         return new Promise((resolve, reject) => {
             connection.query<IWithdraw[]>(
-                `SELECT w.*, u.full_name, w2.net_wallet
+                `SELECT w.*, u.full_name, u.username, w2.net_wallet
                     FROM withdraw w
                         LEFT JOIN users u on u.id = w.user_id
                         LEFT JOIN wallet w2 on w2.user_id  = w.user_id 
