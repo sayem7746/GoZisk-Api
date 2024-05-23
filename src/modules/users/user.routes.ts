@@ -37,6 +37,7 @@ class UserRoutes {
 
     // Delete a User with id
     this.router.get("/hierarchy/:id", auth, this.controller.getHierarchy);
+    this.router.get("/referrals/:id", auth, this.controller.getReferrals);
 
     // Get user transactions
     this.router.get("/transactions/user/:userId/types/:types/limit/:limit/date/:date", auth, this.controller.transactions);

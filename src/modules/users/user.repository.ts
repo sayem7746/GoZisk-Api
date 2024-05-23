@@ -317,6 +317,20 @@ class UserRepository implements IUserRepository {
     });
   }
 
+  getReferrals(userId: number): Promise<User[]> {
+    return new Promise((resolve, reject) => {
+      connection.query<User[]>(
+        `SELECT id, email, username, role_id, password_hash, full_name, country, phone, wallet_addr, refer_code, active
+          FROM users WHERE referrer_id = ?`,
+        [userId],
+        (err, res) => {
+          if (err) reject(err);
+          else resolve(res);
+        }
+      );
+    });
+  }
+
   // Generate reference number
   generateReferenceNumber(): string {
     let toDate = moment().format('YYYYMMDD');

@@ -560,6 +560,21 @@ export default class UserController {
     }
   }
 
+  async getReferrals(req: Request, res: Response) {
+    const id: number = parseInt(req.params.id);
+    try {
+      const users: any[] = await userRepository.getReferrals(id);
+      if (users === undefined) {
+        throw new Error('No referrel user found!');
+      }
+      res.status(200).send(users);
+    } catch (err) {
+      res.status(500).send({
+        message: "Referral user not exists!"
+      });
+    }
+  }
+
   async transactions(req: Request, res: Response) {
     const userId: number = parseInt(req.params.userId);
     const types: string[] = req.params.types.split(',');
