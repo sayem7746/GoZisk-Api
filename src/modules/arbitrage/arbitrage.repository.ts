@@ -484,15 +484,19 @@ class ArbitrageRepository implements IArbitrageRepository {
   }
 
   async getValue(exName: string, func: any): Promise<number> {
-    let exValue = await (await func).close as number
-
-    let isExchangeExits = await this.isExistsExchange(exName);
-      if (!isExchangeExits) {
+    try {
+      let exValue = await (await func).close as number
+      let isExchangeExists = await this.isExistsExchange(exName);
+      if (!isExchangeExists) {
         this.saveRate(exName, exValue);
       } else {
         this.updateRate(exName, exValue);
       }
-    return exValue;
+      return exValue;
+    } catch (err) {
+      console.log(err);
+      return 0;
+    }
   }
 
   calculateProfit(exchanges: any[], investmentValue: number): any {
