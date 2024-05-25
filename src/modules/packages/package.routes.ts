@@ -24,7 +24,8 @@ class PackageRoutes {
     this.router.post("/purchase", this.controller.purchase);
     
     // Purchase withdraw
-    this.router.delete("/:packageId", this.controller.deletePackage);
+    // this.router.delete("/:packageId", this.controller.deletePackage);
+    this.router.delete("/:packageId", this.controller.stopDeletePackage);
   }
 }
 

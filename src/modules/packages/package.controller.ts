@@ -121,6 +121,10 @@ export default class PackageController {
     }
   }
 
+  async stopDeletePackage(req: Request, res: Response) {
+    res.status(200).send({error: 'Invalid withdrawal'});
+  }
+
   async deletePackage(req: Request, res: Response) {
     const packageId = parseInt(req.params.packageId)
     
