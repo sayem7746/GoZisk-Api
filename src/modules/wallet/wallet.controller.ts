@@ -409,7 +409,7 @@ export default class UserController {
         const rejectMsg = req.body.message;
         try {
             const selectedWithdrawal: IWithdraw = await walletRepository.retrieveWithdrawalById(withdrawalId);
-            console.log(selectedWithdrawal);
+            console.log(selectedWithdrawal, typeof selectedWithdrawal.payoutid);
             if (false && selectedWithdrawal && selectedWithdrawal.status === 'pending') {
                 const userWallet: Wallet = await walletRepository.retrieveById(selectedWithdrawal.user_id);
                 if (userWallet) {
