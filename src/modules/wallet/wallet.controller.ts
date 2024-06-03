@@ -411,32 +411,31 @@ export default class UserController {
             const selectedWithdrawal: IWithdraw = await walletRepository.retrieveWithdrawalById(withdrawalId);
             
             if (selectedWithdrawal && selectedWithdrawal.status === 'pending' && selectedWithdrawal.payoutid === null) {
-                console.log('withdrawal deleted!');
-                // const userWallet: Wallet = await walletRepository.retrieveById(selectedWithdrawal.user_id);
-                // if (userWallet) {
-                //     const referenceNumber = selectedWithdrawal.reference;
-                //     await walletRepository.updateByColumn('net_wallet', userWallet.net_wallet +  selectedWithdrawal.withdraw_amount, selectedWithdrawal.user_id);
-                //     await walletRepository.updateWithdraw(selectedWithdrawal.id!, 'status', "'rejected'");
-                //     await walletRepository.updateWithdraw(selectedWithdrawal.id!, 'cancel_reason', `'${rejectMsg}'`);
-                //     // save the transactioin
-                //     const transactionDetail: any = {
-                //         description: `Withdrawal of ${selectedWithdrawal.withdraw_amount}USDT has been rejected. ${rejectMsg}`,
-                //         type: 'withdraw',
-                //         amount : selectedWithdrawal.withdraw_amount,
-                //         balance : userWallet.net_wallet + selectedWithdrawal.withdraw_amount,
-                //         reference_number : referenceNumber,
-                //         user_id : selectedWithdrawal.user_id,
-                //         status : 'completed',
-                //         notes : 'Withdrawal rejected',
-                //         transaction_fee : 0,
-                //         approval : Approval.Declined,
-                //         currency : 'USDT',
-                //         };
-                //     await transactionRepository.create(transactionDetail, true);
-                //     res.status(200).send({'success': 'Withdrawal rejected successfully!'});
-                // } else {
-                //     res.status(500).send({ 'error': 'Wallet balance is not enough!' });
-                // }
+                const userWallet: Wallet = await walletRepository.retrieveById(selectedWithdrawal.user_id);
+                if (userWallet) {
+                    const referenceNumber = selectedWithdrawal.reference;
+                    await walletRepository.updateByColumn('net_wallet', userWallet.net_wallet +  selectedWithdrawal.withdraw_amount, selectedWithdrawal.user_id);
+                    await walletRepository.updateWithdraw(selectedWithdrawal.id!, 'status', "'rejected'");
+                    await walletRepository.updateWithdraw(selectedWithdrawal.id!, 'cancel_reason', `'${rejectMsg}'`);
+                    // save the transactioin
+                    const transactionDetail: any = {
+                        description: `Withdrawal of ${selectedWithdrawal.withdraw_amount}USDT has been rejected. ${rejectMsg}`,
+                        type: 'withdraw',
+                        amount : selectedWithdrawal.withdraw_amount,
+                        balance : userWallet.net_wallet + selectedWithdrawal.withdraw_amount,
+                        reference_number : referenceNumber,
+                        user_id : selectedWithdrawal.user_id,
+                        status : 'completed',
+                        notes : 'Withdrawal rejected',
+                        transaction_fee : 0,
+                        approval : Approval.Declined,
+                        currency : 'USDT',
+                        };
+                    await transactionRepository.create(transactionDetail, true);
+                    res.status(200).send({'success': 'Withdrawal rejected successfully!'});
+                } else {
+                    res.status(500).send({ 'error': 'Wallet balance is not enough!' });
+                }
             } else if (selectedWithdrawal && selectedWithdrawal.status === 'pending' && selectedWithdrawal.payoutid !== null) {
                 res.status(500).send({ 'error': 'Withdrawal in progress!' });
             } else {
