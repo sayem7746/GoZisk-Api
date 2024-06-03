@@ -409,8 +409,8 @@ export default class UserController {
         const rejectMsg = req.body.message;
         try {
             const selectedWithdrawal: IWithdraw = await walletRepository.retrieveWithdrawalById(withdrawalId);
-            console.log(selectedWithdrawal, typeof selectedWithdrawal.payoutid, selectedWithdrawal.payoutid === null);
-            if (false && selectedWithdrawal && selectedWithdrawal.status === 'pending') {
+            
+            if (selectedWithdrawal && selectedWithdrawal.status === 'pending' && selectedWithdrawal.payoutid === null) {
                 const userWallet: Wallet = await walletRepository.retrieveById(selectedWithdrawal.user_id);
                 if (userWallet) {
                     const referenceNumber = selectedWithdrawal.reference;
@@ -436,6 +436,8 @@ export default class UserController {
                 } else {
                     res.status(500).send({ 'error': 'Wallet balance is not enough!' });
                 }    
+            } else if (selectedWithdrawal && selectedWithdrawal.status === 'pending' && selectedWithdrawal.payoutid !== null) {
+                res.status(500).send({ 'error': 'Withdrawal in progress!' });
             } else {
                 res.status(500).send({ 'error': 'Something goes wrong!' });
             }
