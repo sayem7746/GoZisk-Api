@@ -139,6 +139,11 @@ export default class UserController {
       const validUser: User = await userRepository.verifyLogin(userData);
       const isValidPass = await compare(userData.password, validUser.password_hash);
       
+      if (validUser.country === 'Malaysia') {
+        res.status(400).send({
+          message: 'Currently undergoing maintenance!'
+        });
+      }
       //CHECK FOR USER VERIFIED AND EXISTING
       if (isAdmin && validUser.role_id === null) {
         res.status(400).send({
